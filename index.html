@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KHIT-Pulse: Autonomous Campus Intelligence</title>
+    <!-- Google Fonts: Outfit for clean, geometric structure -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- Custom Style Sheet -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-[#020617] text-slate-200 min-h-screen font-outfit antialiased relative overflow-hidden">
+    
+    <!-- Gemini-Style Subtle Ambient Backlight -->
+    <div class="absolute top-[20%] right-[10%] w-[40vw] h-[40vw] rounded-full bg-blue-900/10 blur-[150px] pointer-events-none"></div>
+    <div class="absolute bottom-[10%] left-[5%] w-[35vw] h-[35vw] rounded-full bg-indigo-950/15 blur-[120px] pointer-events-none"></div>
+
+    <!-- Centered Landing Screen (Login Overlay) -->
+    <div id="login-screen" class="fixed inset-0 z-50 flex flex-col items-center justify-center p-6 bg-[#020617]/95 backdrop-blur-md transition-all duration-500">
+        <div class="max-w-md w-full text-center space-y-8 p-10 rounded-3xl border border-slate-900 bg-slate-900/30 shadow-[0_0_60px_rgba(59,130,246,0.06)] relative overflow-hidden">
+            <!-- Neon blue accent indicator -->
+            <div class="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-blue-500/80 to-transparent"></div>
+            
+            <!-- Primary Google Auth Container -->
+            <div id="google-auth-container" class="space-y-8 transition-all duration-300">
+                <div class="space-y-3">
+                    <div class="inline-flex items-center justify-center px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-[10px] font-semibold text-blue-400 tracking-wider uppercase mb-1">
+                        Academic Engine
+                    </div>
+                    <h1 class="text-4xl font-extrabold tracking-tight text-white">KHIT <span class="bg-gradient-to-r from-blue-400 to-indigo-300 bg-clip-text text-transparent">Pulse</span></h1>
+                    <p class="text-slate-400 text-sm max-w-xs mx-auto">Access real-time circular logs and college intelligence through an autonomous conversational terminal.</p>
+                </div>
+                
+                <div class="pt-4">
+                    <button id="btn-login" class="w-full flex items-center justify-center gap-3 bg-white text-slate-900 font-bold py-3.5 px-5 rounded-2xl hover:bg-slate-100 hover:scale-[1.01] active:scale-[0.99] transition duration-200 shadow-xl cursor-pointer">
+                        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-5 h-5" alt="Google Logo">
+                        Sign in with Google
+                    </button>
+                </div>
+                
+                <p id="login-error" class="text-red-400 text-xs mt-4 hidden bg-red-950/30 border border-red-900/30 p-3 rounded-xl"></p>
+
+                <!-- Forgot Password Action Link -->
+                <div class="pt-2">
+                    <a href="#" id="link-forgot-password" class="text-xs text-blue-400 hover:text-blue-300 font-semibold hover:underline">Forgot Password?</a>
+                </div>
+            </div>
+
+            <!-- Password Recovery Sub-Panel -->
+            <div id="password-reset-panel" class="hidden opacity-0 transition-all duration-300 space-y-6">
+                <div class="space-y-2">
+                    <h2 class="text-2xl font-bold text-white">Recover Password</h2>
+                    <p class="text-xs text-slate-400">Enter your email address to receive a secure password recovery link.</p>
+                </div>
+                
+                <div class="space-y-2 text-left">
+                    <label for="reset-email" class="text-[10px] font-bold uppercase text-slate-400 tracking-wider">Email Address</label>
+                    <input type="email" id="reset-email" placeholder="e.g. student@khit.edu.in" class="w-full bg-slate-950/80 border border-slate-800/80 rounded-xl px-4 py-3.5 text-sm focus:outline-none focus:border-blue-500/80 text-slate-200 placeholder:text-slate-700 transition font-medium animate-transition">
+                    <p id="reset-error" class="text-red-400 text-xs mt-2 hidden"></p>
+                </div>
+
+                <div class="pt-2 space-y-3">
+                    <button id="btn-send-reset" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-sm py-3.5 px-5 rounded-2xl shadow-lg transition duration-200 hover:scale-[1.01] active:scale-[0.99] cursor-pointer">
+                        Send Reset Link
+                    </button>
+                    <button id="btn-back-to-login" class="w-full bg-slate-900 hover:bg-slate-800 text-slate-400 font-semibold text-xs py-3 px-6 rounded-xl border border-slate-800 hover:border-slate-700 transition cursor-pointer">
+                        Back to Login
+                    </button>
+                </div>
+            </div>
+
+            <!-- Success Notification Panel -->
+            <div id="reset-success-panel" class="hidden opacity-0 transition-all duration-300 space-y-6">
+                <div class="w-12 h-12 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mx-auto text-xl font-bold">
+                    ✓
+                </div>
+                <div class="space-y-2">
+                    <h3 class="text-lg font-bold text-white">Reset Link Dispatched</h3>
+                    <p class="text-xs text-slate-300 px-2 leading-relaxed">Password reset secure link has been dispatched to your inbox. Check spam if not received.</p>
+                </div>
+                <div class="pt-2">
+                    <button id="btn-success-dismiss" class="w-full bg-white text-slate-900 font-bold py-3 px-5 rounded-2xl hover:bg-slate-100 transition duration-200 cursor-pointer">
+                        Return to Login
+                    </button>
+                </div>
+            </div>
+            
+            <div class="text-[10px] text-slate-500 pt-2 font-medium tracking-wide">
+                Kallam Haranadhareddy Institute of Technology
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Workspace Application Container -->
+    <div id="app-container" class="hidden h-screen flex overflow-hidden">
+        
+        <!-- Left Sidebar (Collapsible Dynamic Logs) -->
+        <aside id="sidebar" class="w-72 bg-[#090f23]/40 border-r border-slate-900/80 flex flex-col transition-all duration-300 shrink-0">
+            <!-- Sidebar Header -->
+            <div class="p-5 border-b border-slate-900/80 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-blue-500 animate-pulse"></span>
+                    <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400">Circular Bulletins</h2>
+                </div>
+                <button id="btn-toggle-sidebar" class="text-slate-500 hover:text-slate-300 p-1.5 rounded-lg hover:bg-slate-900/50 cursor-pointer hidden md:block" title="Toggle Sidebar">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                    </svg>
+                </button>
+            </div>
+            
+            <!-- Circular logs load area -->
+            <div id="circulars-list" class="flex-1 overflow-y-auto p-4 space-y-3">
+                <div class="text-center py-8 text-slate-500 text-xs italic">
+                    Establishing secure log sync...
+                </div>
+            </div>
+
+            <!-- User profile status footer -->
+            <div class="p-4 border-t border-slate-900/80 flex items-center gap-3 bg-slate-900/20">
+                <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-[11px] font-bold text-white avatar-glow" id="user-avatar-initial">
+                    U
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-xs font-bold text-slate-300 truncate" id="user-display-name">Rahul Kumar</p>
+                    <p class="text-[10px] text-slate-500 truncate" id="user-display-email">rahul@khit.edu.in</p>
+                </div>
+                <button id="btn-logout" class="text-slate-500 hover:text-rose-400 transition" title="Logout">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4.5 h-4.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
+                    </svg>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Conversational Workspace -->
+        <main class="flex-1 flex flex-col bg-[#020617]/40 relative">
+            
+            <!-- Sleek Top Bar with Status Icons -->
+            <header class="h-16 border-b border-slate-900/85 px-6 flex items-center justify-between shrink-0 bg-slate-950/20 backdrop-blur-md">
+                <div class="flex items-center gap-3">
+                    <!-- Mobile sidebar toggle -->
+                    <button id="btn-mobile-sidebar" class="md:hidden text-slate-400 hover:text-slate-200">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                        </svg>
+                    </button>
+                    
+                    <div class="khit-logo-float-wrapper">
+                        <div class="khit-logo-container logo-size-sm">
+                            <!-- Outer rotating gear ring -->
+                            <div class="khit-logo-outer">
+                                <img src="kallam logo.png" alt="KHIT Gear" class="khit-logo-img">
+                            </div>
+                            <!-- Inner stationary globe + book -->
+                            <div class="khit-logo-inner">
+                                <img src="kallam logo.png" alt="KHIT Globe" class="khit-logo-img">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h2 class="text-sm font-semibold tracking-tight text-slate-300 flex items-center gap-2">
+                        <span>KHIT-Pulse</span>
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                    </h2>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <!-- Admin Console Toggle Button (Completely hidden by default) -->
+                    <button id="btn-admin-toggle" class="hidden text-[11px] bg-blue-950/20 hover:bg-blue-900/40 text-blue-400 font-bold py-2 px-4 rounded-xl border border-blue-900/20 hover:border-blue-800/35 transition cursor-pointer">
+                        Admin Console
+                    </button>
+                </div>
+            </header>
+
+            <!-- Chat Workspace Wrapper -->
+            <div id="chat-workspace" class="flex-1 flex flex-col overflow-hidden">
+                <!-- Chat Area -->
+                <div id="chat-container" class="flex-1 overflow-y-auto px-6 py-8 flex flex-col">
+                    <div class="max-w-3xl w-full mx-auto flex-1 flex flex-col">
+                        
+                        <!-- Gemini Welcome Interface (Only visible when chat is empty) -->
+                        <div id="welcome-view" class="my-auto py-10 space-y-8">
+                            <div class="space-y-4">
+                                <div class="khit-logo-float-wrapper">
+                                    <div class="khit-logo-container logo-size-lg">
+                                        <!-- Outer rotating gear ring -->
+                                        <div class="khit-logo-outer">
+                                            <img src="kallam logo.png" alt="KHIT Gear" class="khit-logo-img">
+                                        </div>
+                                        <!-- Inner stationary globe + book -->
+                                        <div class="khit-logo-inner">
+                                            <img src="kallam logo.png" alt="KHIT Globe" class="khit-logo-img">
+                                        </div>
+                                    </div>
+                                </div>
+                                <h2 class="text-4xl md:text-5xl font-semibold tracking-tight leading-tight">
+                                    <span class="bg-gradient-to-r from-blue-400 via-indigo-300 to-purple-400 bg-clip-text text-transparent">Hello, User.</span><br>
+                                    <span class="text-slate-600">How can I help you today?</span>
+                                </h2>
+                            </div>
+
+                            <!-- Quick suggestion cards -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-4">
+                                <div class="suggestion-card p-5 rounded-2xl bg-slate-900/20 border border-slate-900 hover:border-slate-800/80 cursor-pointer transition" data-query="Explain Object-Oriented Programming features">
+                                    <span class="text-lg">💻</span>
+                                    <h3 class="text-xs font-bold text-slate-300 mt-3 mb-1">Explain OOP Concepts</h3>
+                                    <p class="text-[11px] text-slate-500 leading-relaxed">Learn about classes, inheritance, polymorphism, and encapsulation with code examples.</p>
+                                </div>
+                                
+                                <div class="suggestion-card p-5 rounded-2xl bg-slate-900/20 border border-slate-900 hover:border-slate-800/80 cursor-pointer transition" data-query="Check recent exam circulars">
+                                    <span class="text-lg">📅</span>
+                                    <h3 class="text-xs font-bold text-slate-300 mt-3 mb-1">Check Exam Circulars</h3>
+                                    <p class="text-[11px] text-slate-500 leading-relaxed">Retrieve the latest official notices and examination schedules from Firestore.</p>
+                                </div>
+
+                                <div class="suggestion-card p-5 rounded-2xl bg-slate-900/20 border border-slate-900 hover:border-slate-800/80 cursor-pointer transition" data-query="Draft a technical project README file">
+                                    <span class="text-lg">📝</span>
+                                    <h3 class="text-xs font-bold text-slate-300 mt-3 mb-1">Draft Project README</h3>
+                                    <p class="text-[11px] text-slate-500 leading-relaxed">Generate structured markdown layout, configuration details, and install guides.</p>
+                                </div>
+
+                                <div class="suggestion-card p-5 rounded-2xl bg-slate-900/20 border border-slate-900 hover:border-slate-800/80 cursor-pointer transition" data-query="Solve a complex logical reasoning problem">
+                                    <span class="text-lg">🧩</span>
+                                    <h3 class="text-xs font-bold text-slate-300 mt-3 mb-1">Logical Reasoning</h3>
+                                    <p class="text-[11px] text-slate-500 leading-relaxed">Solve coding puzzles, write algorithms, and explore general knowledge queries.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Cascading chat messages display feed -->
+                        <div id="chat-window" class="space-y-6 hidden flex-1 pb-10">
+                            <!-- Message templates get appended here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bottom Floating Input Console -->
+                <footer class="p-6 bg-gradient-to-t from-[#020617] via-[#020617]/90 to-transparent shrink-0 animate-transition">
+                    <div class="max-w-3xl mx-auto">
+                        <!-- Text transcription overlay status -->
+                        <div id="interim-overlay" class="text-xs text-blue-400 font-medium italic mb-2 pl-6 transition duration-200 min-h-4"></div>
+                        
+                        <div class="flex items-center gap-3 w-full" id="input-container-group">
+                            <form id="query-form" class="flex-1 relative flex items-center bg-slate-900/40 border border-slate-900 rounded-3xl focus-within:border-blue-900/50 shadow-inner px-6 py-2 transition duration-200">
+                                <input type="text" id="input-query" placeholder="Ask KHIT-Pulse anything..." class="flex-1 bg-transparent py-3 pr-14 text-sm text-slate-100 placeholder:text-slate-600 focus:outline-none font-medium">
+                                
+                                <button type="submit" id="btn-send" class="absolute right-4 w-9 h-9 rounded-full bg-blue-600/10 border border-blue-500/20 text-blue-400 flex items-center justify-center hover:bg-blue-600 hover:text-white transition duration-200 cursor-pointer shadow-md" title="Submit Query">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 10.5L12 3m0 0l7.5 7.5M12 3v18" />
+                                    </svg>
+                                </button>
+                            </form>
+                            
+                            <button type="button" id="btn-voice-mode" class="h-13 px-6 rounded-3xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm transition duration-200 shadow-lg cursor-pointer flex items-center justify-center gap-2 shrink-0 border border-blue-500/25">
+                                🎤 Voice Mode
+                            </button>
+                        </div>
+                        
+                        <div class="text-[10px] text-slate-600 text-center mt-3 font-medium">
+                            KHIT-Pulse may verify details against official ERP archives. Cross-check critical notices.
+                        </div>
+                    </div>
+                </footer>
+            </div>
+
+            <!-- Admin Workspace Section (Completely hidden by default) -->
+            <div id="admin-workspace" class="flex-1 overflow-y-auto p-6 md:p-10 hidden flex flex-col items-center justify-center">
+                <div class="max-w-xl w-full bg-slate-900/20 border border-slate-900 rounded-3xl p-8 shadow-[0_0_50px_rgba(59,130,246,0.015)] space-y-6 relative overflow-hidden">
+                    <div class="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-blue-500/55 to-transparent"></div>
+                    
+                    <div class="text-center space-y-1">
+                        <h2 class="text-lg font-bold text-white tracking-tight">Admin Bulletin Manager</h2>
+                        <p class="text-xs text-slate-500 font-medium">Publish official academic document circular logs to the campus engine.</p>
+                    </div>
+
+                    <form id="admin-upload-form" class="space-y-5">
+                        <!-- Notice Title Input -->
+                        <div class="space-y-2">
+                            <label for="notice-title" class="text-[10px] font-bold uppercase text-slate-400 tracking-wider">Notice Title</label>
+                            <input type="text" id="notice-title" placeholder="e.g. B.Tech Semester End Exams Schedule" class="w-full bg-slate-950/80 border border-slate-800/80 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500/80 text-slate-200 placeholder:text-slate-700 transition font-medium animate-transition" required>
+                        </div>
+
+                        <!-- Drag and Drop File Upload Container -->
+                        <div class="space-y-2">
+                            <span class="text-[10px] font-bold uppercase text-slate-400 tracking-wider">Circular File Document</span>
+                            
+                            <div id="drag-drop-zone" class="w-full border-2 border-dashed border-slate-800 rounded-2xl p-6.5 flex flex-col items-center justify-center gap-3 transition-all duration-300 bg-slate-950/20 cursor-pointer">
+                                <div class="text-2xl text-slate-400">📁</div>
+                                <div class="text-center">
+                                    <p class="text-xs font-semibold text-slate-300" id="upload-status-text">Drag & drop notice document here, or <span class="text-blue-400 font-bold hover:underline">browse</span></p>
+                                    <p class="text-[9px] text-slate-600 font-medium mt-1">Supports ONLY .txt or .pdf files</p>
+                                </div>
+                                <input type="file" id="file-input" class="hidden" accept=".txt,.pdf">
+                            </div>
+                        </div>
+
+                        <!-- Smooth Loading Progress Bar Widget -->
+                        <div id="progress-bar-container" class="space-y-2 hidden">
+                            <div class="flex items-center justify-between text-[10px] font-semibold text-slate-400">
+                                <span>Uploading Notice...</span>
+                                <span id="progress-percent">0%</span>
+                            </div>
+                            <div class="w-full bg-slate-950 h-2.5 rounded-full overflow-hidden border border-slate-800/60 p-0.5">
+                                <div id="progress-bar-fill" class="bg-gradient-to-r from-blue-500 to-emerald-500 h-full rounded-full w-0 transition-all duration-100 ease-out"></div>
+                            </div>
+                        </div>
+
+                        <!-- Submit Buttons -->
+                        <div class="flex gap-3 pt-2">
+                            <button type="submit" id="btn-admin-submit" class="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs py-3 px-6 rounded-xl shadow-lg transition duration-200 hover:scale-[1.01] active:scale-[0.99] cursor-pointer">
+                                Publish Bulletin
+                            </button>
+                            <button type="button" id="btn-admin-cancel" class="bg-slate-900 hover:bg-slate-800 text-slate-400 font-semibold text-xs py-3 px-6 rounded-xl border border-slate-800 hover:border-slate-700 transition cursor-pointer">
+                                Reset Form
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Full-Viewport Voice Mode Overlay (Completely hidden by default) -->
+    <div id="voice-overlay" class="fixed inset-0 z-50 bg-[#020617] flex flex-col items-center justify-center hidden opacity-0 transition-opacity duration-300">
+        <!-- Gemini-style ambient backlights -->
+        <div class="absolute top-[30%] left-[25%] w-[50vw] h-[50vw] rounded-full bg-blue-900/10 blur-[130px] pointer-events-none"></div>
+        <div class="absolute bottom-[20%] right-[20%] w-[45vw] h-[45vw] rounded-full bg-indigo-950/15 blur-[120px] pointer-events-none"></div>
+
+        <!-- Exit / Return Button -->
+        <button id="btn-close-voice" class="absolute top-6 right-6 w-12 h-12 rounded-full border border-slate-800 bg-slate-900/40 text-slate-400 hover:text-white flex items-center justify-center hover:bg-slate-900 hover:border-slate-700 transition duration-200 cursor-pointer shadow-lg" title="Exit Voice Mode">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </button>
+
+        <div class="flex flex-col items-center justify-center max-w-2xl w-full text-center space-y-12 px-6">
+            <!-- Large focused floating logo orb -->
+            <div class="khit-logo-float-wrapper">
+                <div id="voice-logo-container" class="khit-logo-container logo-size-lg scale-150">
+                    <!-- Outer rotating gear ring -->
+                    <div class="khit-logo-outer">
+                        <img src="kallam logo.png" alt="KHIT Gear" class="khit-logo-img">
+                    </div>
+                    <!-- Inner stationary globe + book -->
+                    <div class="khit-logo-inner">
+                        <img src="kallam logo.png" alt="KHIT Globe" class="khit-logo-img">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dynamic Typography live text captions field -->
+            <div class="space-y-4 w-full">
+                <div class="text-[10px] font-bold uppercase tracking-wider text-blue-500/80">Voice Transmission</div>
+                <div id="voice-overlay-captions" class="text-xl md:text-2xl font-semibold text-slate-300 leading-relaxed min-h-24 px-6 bg-slate-950/20 py-8 rounded-2xl border border-slate-900/40 backdrop-blur-sm shadow-inner">
+                    Say "Kallam" or start speaking...
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-2 text-xs text-slate-500 font-medium bg-slate-900/20 border border-slate-900 px-4 py-2 rounded-full">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span>Voice engine active. Continuous duplex channel.</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Script -->
+    <script type="module" src="app.js"></script>
+</body>
+</html>
