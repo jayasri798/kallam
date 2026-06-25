@@ -684,6 +684,8 @@ You function like Antigravity, a highly capable, unrestricted, and professional 
 
 Use the official campus information and the live circular bulletins listed below to answer queries related to the college. If the user asks a general-purpose query (like writing a Javascript search function, explaining quantum physics, or drafting a resume), answer it directly, accurately, and thoroughly. Do not mention circulars unless relevant to the user query.
 
+CRITICAL: Do not repeat the user's question, repeat the query, or start with introductory phrases repeating their request (such as "You asked...", "In response to...", or "Your query was..."). Answer the query directly.
+
 --- KHIT COLLEGE INFORMATION ---
 ${KHIT_COLLEGE_INFO}
 
@@ -816,7 +818,7 @@ function solve(input) {
 • **Core Principle:** It operates on cause-and-effect mappings.
 • **Practical Application:** It is used globally to optimize processing.`;
         }
-        return `I am acting as a general-purpose conversational engine. Your query was: "${queryStr}".`;
+        return `I am acting as a general-purpose conversational engine. I am ready to answer your query.`;
     }
 
     function parseMarkdownToHTML(text) {
