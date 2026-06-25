@@ -124,6 +124,10 @@
                 </div>
 
                 <div class="flex items-center gap-3">
+                    <!-- Clear Chat Button -->
+                    <button id="btn-clear-chat" class="text-[10px] bg-slate-950/50 hover:bg-slate-900/30 text-slate-400 hover:text-slate-200 font-pixel py-2 px-4 rounded-xl border border-slate-900/80 transition cursor-pointer uppercase">
+                        Clear Chat
+                    </button>
                     <!-- Admin Console Toggle Button (Completely hidden by default) -->
                     <button id="btn-admin-toggle" class="hidden text-[10px] bg-[#0147a3]/10 hover:bg-[#0147a3]/30 text-[#5aa2fa] font-pixel py-2 px-4 rounded-xl border border-[#5aa2fa]/20 transition cursor-pointer uppercase">
                         Admin Console
@@ -235,8 +239,9 @@
             </div>
 
             <!-- Admin Workspace Section (Completely hidden by default) -->
-            <div id="admin-workspace" class="flex-1 overflow-y-auto p-6 md:p-10 hidden flex flex-col items-center justify-center">
-                <div class="max-w-xl w-full bg-slate-900/10 border border-slate-900 rounded-3xl p-8 shadow-[0_0_50px_rgba(1,71,163,0.02)] space-y-6 relative overflow-hidden">
+            <div id="admin-workspace" class="flex-1 overflow-y-auto p-6 md:p-10 hidden flex flex-col items-center justify-start gap-8 pb-16">
+                <!-- Publish Bulletin Card -->
+                <div class="max-w-4xl w-full bg-slate-900/10 border border-slate-900 rounded-3xl p-8 shadow-[0_0_50px_rgba(1,71,163,0.02)] space-y-6 relative overflow-hidden">
                     <div class="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#5aa2fa]/55 to-transparent"></div>
                     
                     <div class="text-center space-y-1">
@@ -287,6 +292,38 @@
                         </div>
                     </form>
                 </div>
+
+                <!-- Manage Circular Bulletins Card -->
+                <div class="max-w-4xl w-full bg-slate-900/10 border border-slate-900 rounded-3xl p-8 shadow-[0_0_50px_rgba(1,71,163,0.02)] space-y-6 relative overflow-hidden">
+                    <div class="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#5aa2fa]/55 to-transparent"></div>
+                    
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h2 class="text-md font-pixel text-white uppercase">Manage Circular Bulletins</h2>
+                            <p class="text-xs text-slate-500 font-medium">Delete outdated or incorrect notices from the active campus index in real-time.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="overflow-x-auto w-full border border-slate-900/60 rounded-2xl bg-slate-950/20">
+                        <table class="w-full text-left border-collapse text-xs">
+                            <thead>
+                                <tr class="border-b border-slate-900/60 bg-slate-950/50 text-[10px] font-pixel text-slate-400 uppercase tracking-wider">
+                                    <th class="p-4">Title</th>
+                                    <th class="p-4">Category</th>
+                                    <th class="p-4">Date</th>
+                                    <th class="p-4 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-bulletins-list" class="divide-y divide-slate-900/40 font-grotesk text-slate-300">
+                                <tr>
+                                    <td colspan="4" class="p-8 text-center text-slate-500 italic">
+                                        Loading active circular logs...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </main>
     </div>
@@ -306,7 +343,12 @@
 
         <div class="flex flex-col items-center justify-center max-w-2xl w-full text-center space-y-12 px-6">
             <!-- Large focused floating logo orb -->
-            <div class="khit-logo-float-wrapper">
+            <div class="khit-logo-float-wrapper relative flex items-center justify-center">
+                <!-- Multi-ring ambient ripples -->
+                <div class="mic-active-ring"></div>
+                <div class="mic-active-ring"></div>
+                <div class="mic-active-ring"></div>
+                
                 <div id="voice-logo-container" class="khit-logo-container logo-size-lg scale-150">
                     <!-- Outer rotating gear ring -->
                     <div class="khit-logo-outer">

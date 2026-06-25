@@ -19,7 +19,8 @@ import {
     getDoc, 
     getDocs,
     collection,
-    onSnapshot
+    onSnapshot,
+    deleteDoc
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 // --- Firebase Configuration ---
@@ -153,6 +154,12 @@ document.addEventListener("DOMContentLoaded", () => {
     
     let btnAdminCancel;
     try { btnAdminCancel = document.getElementById("btn-admin-cancel"); } catch (e) { console.warn("Selector error 'btn-admin-cancel':", e); }
+    
+    let btnClearChat;
+    try { btnClearChat = document.getElementById("btn-clear-chat"); } catch (e) { console.warn("Selector error 'btn-clear-chat':", e); }
+    
+    let adminBulletinsList;
+    try { adminBulletinsList = document.getElementById("admin-bulletins-list"); } catch (e) { console.warn("Selector error 'admin-bulletins-list':", e); }
 
     // Voice Mode Overlay Elements
     let btnVoiceMode;
@@ -461,29 +468,108 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function renderCircularLogs(logs) {
-        if (!circularsList) return;
-        circularsList.innerHTML = "";
-        logs.forEach(log => {
-            const item = document.createElement("div");
-            item.className = "p-4.5 rounded-2xl border border-slate-900 bg-slate-900/10 cursor-pointer circular-item transition duration-200";
-            item.innerHTML = `
-                <div class="flex items-center justify-between gap-1.5 mb-2">
-                    <span class="text-[9px] uppercase font-bold tracking-wider px-2 py-0.5 rounded ${log.urgent ? 'text-rose-400 bg-rose-500/10 border border-rose-500/20' : 'text-blue-400 bg-blue-500/10 border border-blue-500/20'}">
-                        ${log.category}
-                    </span>
-                    <span class="text-[9px] text-slate-500 font-semibold">${log.date}</span>
-                </div>
-                <h4 class="text-xs font-bold text-slate-200 line-clamp-1 leading-tight mb-1">${log.title}</h4>
-                <p class="text-[10px] text-slate-500 line-clamp-2 leading-normal">${log.summary}</p>
-            `;
-            
-            item.addEventListener("click", () => {
-                const queryStr = `Details on ${log.title}`;
-                if (inputQuery) inputQuery.value = queryStr;
-                submitAcademicQuery(queryStr);
-            });
-            circularsList.appendChild(item);
-        });
+        if (circularsList) {
+            circularsList.innerHTML = "";
+            if (logs.length === 0) {
+                circularsList.innerHTML = `
+                    <div class="text-center py-8 text-slate-500 text-xs italic">
+                        No circular logs active.
+                    </div>
+                `;
+            } else {
+                logs.forEach(log => {
+                    const item = document.createElement("div");
+                    item.className = "p-4.5 rounded-2xl border border-slate-900 bg-slate-900/10 cursor-pointer circular-item transition duration-200";
+                    item.innerHTML = `
+                        <div class="flex items-center justify-between gap-1.5 mb-2">
+                            <span class="text-[9px] uppercase font-bold tracking-wider px-2 py-0.5 rounded ${log.urgent ? 'text-rose-400 bg-rose-500/10 border border-rose-500/20' : 'text-blue-400 bg-blue-500/10 border border-blue-500/20'}">
+                                ${log.category}
+                            </span>
+                            <span class="text-[9px] text-slate-500 font-semibold">${log.date}</span>
+                        </div>
+                        <h4 class="text-xs font-bold text-slate-200 line-clamp-1 leading-tight mb-1">${log.title}</h4>
+                        <p class="text-[10px] text-slate-500 line-clamp-2 leading-normal">${log.summary}</p>
+                    `;
+                    
+                    item.addEventListener("click", () => {
+                        const queryStr = `Details on ${log.title}`;
+                        if (inputQuery) inputQuery.value = queryStr;
+                        submitAcademicQuery(queryStr);
+                    });
+                    circularsList.appendChild(item);
+                });
+            }
+        }
+
+        if (adminBulletinsList) {
+            adminBulletinsList.innerHTML = "";
+            if (logs.length === 0) {
+                adminBulletinsList.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="p-8 text-center text-slate-500 italic">No circular bulletins found.</td>
+                    </tr>
+                `;
+            } else {
+                logs.forEach(log => {
+                    const tr = document.createElement("tr");
+                    tr.className = "border-b border-slate-900/60 hover:bg-slate-950/40 transition duration-150";
+                    tr.innerHTML = `
+                        <td class="p-4 font-semibold text-slate-200">
+                            <div class="truncate max-w-xs md:max-w-md font-pixel uppercase text-[11px]" title="${log.title}">${log.title}</div>
+                        </td>
+                        <td class="p-4">
+                            <span class="text-[9px] uppercase font-bold tracking-wider px-2 py-0.5 rounded ${log.urgent ? 'text-rose-400 bg-rose-500/10 border border-rose-500/20' : 'text-blue-400 bg-blue-500/10 border border-blue-500/20'}">
+                                ${log.category}
+                            </span>
+                        </td>
+                        <td class="p-4 text-slate-400">${log.date}</td>
+                        <td class="p-4 text-right">
+                            <button class="btn-delete-bulletin text-rose-500 hover:text-rose-400 p-2 rounded-xl hover:bg-rose-950/20 transition cursor-pointer" data-id="${log.id}" title="Delete Bulletin">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 inline">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                                </svg>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+                
+                const deleteBtn = tr.querySelector(".btn-delete-bulletin");
+                deleteBtn.addEventListener("click", async (e) => {
+                    e.stopPropagation();
+                    const docId = deleteBtn.getAttribute("data-id");
+                    if (confirm(`Are you sure you want to delete the bulletin "${log.title}"?`)) {
+                        try {
+                            deleteBtn.disabled = true;
+                            deleteBtn.innerHTML = `
+                                <svg class="animate-spin h-4 w-4 text-rose-500 inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                            `;
+                            
+                            await deleteDoc(doc(db, "circulars", docId));
+                            try {
+                                await deleteDoc(doc(db, "uploaded_circulars", docId));
+                            } catch (err) {
+                                console.warn("uploaded_circulars delete skipped:", err);
+                            }
+                            showToast("Notice deleted successfully.");
+                        } catch (err) {
+                            console.error("Delete notice failed:", err);
+                            showToast("Failed to delete notice from database.");
+                            deleteBtn.disabled = false;
+                            deleteBtn.innerHTML = `
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 inline">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                                </svg>
+                            `;
+                        }
+                    }
+                });
+                adminBulletinsList.appendChild(tr);
+                });
+            }
+        }
     }
 
     // --- Query Form Handler & Conversation Flow ---
@@ -687,6 +773,83 @@ function solve(input) {
         return `I am acting as a general-purpose conversational engine. Your query was: "${queryStr}".`;
     }
 
+    function parseMarkdownToHTML(text) {
+        if (!text) return "";
+        
+        const placeholders = [];
+        let html = text;
+        
+        // 1. Code blocks: ``` ... ```
+        html = html.replace(/```(?:[a-zA-Z0-9+#-]+)?\n([\s\S]*?)\n```/g, (match, code) => {
+            const escapedCode = code
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;");
+            const replacement = `<div class="my-3 p-4 rounded-xl bg-slate-950/80 border border-slate-900 font-mono text-xs overflow-x-auto text-[#5aa2fa] whitespace-pre-wrap"><pre><code>${escapedCode}</code></pre></div>`;
+            placeholders.push(replacement);
+            return `___PLACEHOLDER_${placeholders.length - 1}___`;
+        });
+        
+        // 2. Inline code: `code`
+        html = html.replace(/`([^`\n]+)`/g, (match, code) => {
+            const escapedCode = code
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;");
+            const replacement = `<code class="px-1.5 py-0.5 rounded bg-slate-950/80 border border-slate-900 font-mono text-xs text-[#5aa2fa]">${escapedCode}</code>`;
+            placeholders.push(replacement);
+            return `___PLACEHOLDER_${placeholders.length - 1}___`;
+        });
+        
+        // 3. Bold text: **text**
+        html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+        
+        // 4. Bullet points: list generation
+        const lines = html.split('\n');
+        let inList = false;
+        const resultLines = [];
+        
+        for (let line of lines) {
+            const listMatch = line.match(/^(\s*)[*+-]\s+(.*)$/);
+            if (listMatch) {
+                if (!inList) {
+                    resultLines.push('<ul class="list-disc pl-5 my-2 space-y-1">');
+                    inList = true;
+                }
+                resultLines.push(`<li>${listMatch[2]}</li>`);
+            } else {
+                if (inList) {
+                    resultLines.push('</ul>');
+                    inList = false;
+                }
+                resultLines.push(line);
+            }
+        }
+        if (inList) {
+            resultLines.push('</ul>');
+        }
+        html = resultLines.join('\n');
+        
+        // 5. Line breaks: replace single \n with <br>
+        html = html.replace(/\n/g, '<br>');
+        
+        // Restore placeholders
+        for (let i = placeholders.length - 1; i >= 0; i--) {
+            html = html.replace(`___PLACEHOLDER_${i}___`, placeholders[i]);
+        }
+        
+        return html;
+    }
+
+    function scrollToBottom() {
+        if (chatContainer) {
+            chatContainer.scrollTo({
+                top: chatContainer.scrollHeight,
+                behavior: 'smooth'
+            });
+        }
+    }
+
     function appendStreamingBubble(text, onComplete) {
         if (!chatWindow) return;
         const bubble = document.createElement("div");
@@ -715,14 +878,17 @@ function solve(input) {
         scrollToBottom();
         
         const textBox = bubble.querySelector(".streaming-text-box");
-        const tokens = text.match(/<[^>]+>|[^<>\s]+|\s+/g) || [];
+        const tokens = text.match(/[^<> \n]+|\s+|\n/g) || [];
         let tokenIndex = 0;
+        let currentRawText = "";
         
         const timer = setInterval(() => {
             if (tokenIndex < tokens.length) {
-                if (textBox) textBox.innerHTML += tokens[tokenIndex];
+                currentRawText += tokens[tokenIndex];
+                const parsedHtml = parseMarkdownToHTML(currentRawText);
+                if (textBox) textBox.innerHTML = parsedHtml;
                 if (voiceModeOverlayActive && voiceOverlayCaptions) {
-                    voiceOverlayCaptions.innerHTML = textBox ? textBox.innerHTML : "";
+                    voiceOverlayCaptions.innerHTML = parsedHtml;
                 }
                 tokenIndex++;
                 scrollToBottom();
@@ -761,7 +927,7 @@ function solve(input) {
             ${avatar}
             <div class="space-y-1.5 flex-1">
                 <h4 class="text-[10px] font-semibold uppercase text-slate-500 tracking-wider ${sender === "user" ? "text-right" : ""}">${nameLabel}</h4>
-                <p class="text-sm text-slate-300 leading-relaxed font-medium ${sender === "user" ? "text-right" : ""}">${text}</p>
+                <p class="text-sm text-slate-300 leading-relaxed font-medium ${sender === "user" ? "text-right" : ""}">${sender === "user" ? text : parseMarkdownToHTML(text)}</p>
             </div>
         `;
         
@@ -920,6 +1086,7 @@ function solve(input) {
 
             activeRecognition.onstart = () => {
                 capturedSpeechText = "";
+                if (voiceOverlay) voiceOverlay.classList.add("voice-listening");
             };
 
             activeRecognition.onresult = (event) => {
@@ -956,6 +1123,7 @@ function solve(input) {
 
             activeRecognition.onend = () => {
                 setMicState('off');
+                if (voiceOverlay) voiceOverlay.classList.remove("voice-listening");
                 
                 try {
                     document.querySelectorAll(".khit-logo-container").forEach(el => {
@@ -1087,6 +1255,7 @@ function solve(input) {
             
             if (voiceOverlay) {
                 voiceOverlay.classList.remove("voice-overlay-active");
+                voiceOverlay.classList.remove("voice-listening");
                 setTimeout(() => {
                     voiceOverlay.classList.add("hidden");
                 }, 350);
@@ -1112,11 +1281,38 @@ function solve(input) {
                 chatWorkspace.classList.add("hidden");
                 adminWorkspace.classList.remove("hidden");
                 btnAdminToggle.textContent = "Go to Chat";
+                if (btnClearChat) btnClearChat.classList.add("hidden");
             } else {
                 adminWorkspace.classList.add("hidden");
                 chatWorkspace.classList.remove("hidden");
                 btnAdminToggle.textContent = "Admin Console";
+                if (btnClearChat) btnClearChat.classList.remove("hidden");
             }
+        });
+    }
+
+    if (btnClearChat) {
+        btnClearChat.addEventListener("click", () => {
+            window.speechSynthesis.cancel();
+            stopActiveQueryCapture();
+            stopPassiveWakeListener();
+            
+            if (chatWindow) {
+                chatWindow.innerHTML = "";
+                chatWindow.classList.add("hidden");
+            }
+            if (welcomeView) {
+                welcomeView.classList.remove("hidden");
+            }
+            if (inputQuery) {
+                inputQuery.value = "";
+            }
+            if (interimOverlay) {
+                interimOverlay.textContent = "";
+            }
+            
+            setLogoProcessing(false);
+            showToast("Chat context cleared.");
         });
     }
 
