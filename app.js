@@ -10,8 +10,7 @@ import {
     getRedirectResult,
     GoogleAuthProvider, 
     onAuthStateChanged, 
-    signOut,
-    sendPasswordResetEmail
+    signOut
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { 
     getFirestore, 
@@ -154,26 +153,6 @@ document.addEventListener("DOMContentLoaded", () => {
     
     let btnAdminCancel;
     try { btnAdminCancel = document.getElementById("btn-admin-cancel"); } catch (e) { console.warn("Selector error 'btn-admin-cancel':", e); }
-
-    // Password Recovery Elements
-    let lnkForgotPassword;
-    try { lnkForgotPassword = document.getElementById("link-forgot-password"); } catch (e) { console.warn("Selector error 'link-forgot-password':", e); }
-    let passwordResetPanel;
-    try { passwordResetPanel = document.getElementById("password-reset-panel"); } catch (e) { console.warn("Selector error 'password-reset-panel':", e); }
-    let googleAuthContainer;
-    try { googleAuthContainer = document.getElementById("google-auth-container"); } catch (e) { console.warn("Selector error 'google-auth-container':", e); }
-    let resetEmailInput;
-    try { resetEmailInput = document.getElementById("reset-email"); } catch (e) { console.warn("Selector error 'reset-email':", e); }
-    let btnSendReset;
-    try { btnSendReset = document.getElementById("btn-send-reset"); } catch (e) { console.warn("Selector error 'btn-send-reset':", e); }
-    let btnBackToLogin;
-    try { btnBackToLogin = document.getElementById("btn-back-to-login"); } catch (e) { console.warn("Selector error 'btn-back-to-login':", e); }
-    let resetSuccessPanel;
-    try { resetSuccessPanel = document.getElementById("reset-success-panel"); } catch (e) { console.warn("Selector error 'reset-success-panel':", e); }
-    let btnSuccessDismiss;
-    try { btnSuccessDismiss = document.getElementById("btn-success-dismiss"); } catch (e) { console.warn("Selector error 'btn-success-dismiss':", e); }
-    let resetErrorText;
-    try { resetErrorText = document.getElementById("reset-error"); } catch (e) { console.warn("Selector error 'reset-error':", e); }
 
     // Voice Mode Overlay Elements
     let btnVoiceMode;
@@ -327,89 +306,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 await signOut(auth);
             } catch (err) {
                 console.error("Logout failed:", err);
-            }
-        });
-    }
-
-    // --- Password Reset & Recovery Event Handlers ---
-    if (lnkForgotPassword && googleAuthContainer && passwordResetPanel) {
-        lnkForgotPassword.addEventListener("click", (e) => {
-            e.preventDefault();
-            googleAuthContainer.classList.add("hidden");
-            passwordResetPanel.classList.remove("hidden");
-            setTimeout(() => {
-                passwordResetPanel.classList.remove("opacity-0");
-            }, 10);
-            if (resetEmailInput) resetEmailInput.value = "";
-            if (resetErrorText) {
-                resetErrorText.textContent = "";
-                resetErrorText.classList.add("hidden");
-            }
-        });
-    }
-
-    if (btnBackToLogin && googleAuthContainer && passwordResetPanel) {
-        btnBackToLogin.addEventListener("click", (e) => {
-            e.preventDefault();
-            passwordResetPanel.classList.add("opacity-0");
-            setTimeout(() => {
-                passwordResetPanel.classList.add("hidden");
-                googleAuthContainer.classList.remove("hidden");
-            }, 300);
-        });
-    }
-
-    if (btnSuccessDismiss && googleAuthContainer && resetSuccessPanel) {
-        btnSuccessDismiss.addEventListener("click", (e) => {
-            e.preventDefault();
-            resetSuccessPanel.classList.add("opacity-0");
-            setTimeout(() => {
-                resetSuccessPanel.classList.add("hidden");
-                googleAuthContainer.classList.remove("hidden");
-            }, 300);
-        });
-    }
-
-    if (btnSendReset) {
-        btnSendReset.addEventListener("click", async (e) => {
-            e.preventDefault();
-            if (!resetEmailInput) return;
-            const email = resetEmailInput.value.trim();
-            if (!email) {
-                if (resetErrorText) {
-                    resetErrorText.textContent = "Please enter an email address.";
-                    resetErrorText.classList.remove("hidden");
-                }
-                return;
-            }
-
-            btnSendReset.disabled = true;
-            btnSendReset.textContent = "Sending...";
-            if (resetErrorText) resetErrorText.classList.add("hidden");
-
-            try {
-                await sendPasswordResetEmail(auth, email);
-                console.log("Password reset email sent to:", email);
-                
-                if (passwordResetPanel && resetSuccessPanel) {
-                    passwordResetPanel.classList.add("opacity-0");
-                    setTimeout(() => {
-                        passwordResetPanel.classList.add("hidden");
-                        resetSuccessPanel.classList.remove("hidden");
-                        setTimeout(() => {
-                            resetSuccessPanel.classList.remove("opacity-0");
-                        }, 10);
-                    }, 300);
-                }
-            } catch (error) {
-                console.error("Firebase sendPasswordResetEmail error:", error);
-                if (resetErrorText) {
-                    resetErrorText.textContent = error.message || "Failed to send reset email.";
-                    resetErrorText.classList.remove("hidden");
-                }
-            } finally {
-                btnSendReset.disabled = false;
-                btnSendReset.textContent = "Send Reset Link";
             }
         });
     }

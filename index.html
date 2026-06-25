@@ -25,69 +25,22 @@
             <!-- Neon blue accent indicator -->
             <div class="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-blue-500/80 to-transparent"></div>
             
-            <!-- Primary Google Auth Container -->
-            <div id="google-auth-container" class="space-y-8 transition-all duration-300">
-                <div class="space-y-3">
-                    <div class="inline-flex items-center justify-center px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-[10px] font-semibold text-blue-400 tracking-wider uppercase mb-1">
-                        Academic Engine
-                    </div>
-                    <h1 class="text-4xl font-extrabold tracking-tight text-white">KHIT <span class="bg-gradient-to-r from-blue-400 to-indigo-300 bg-clip-text text-transparent">Pulse</span></h1>
-                    <p class="text-slate-400 text-sm max-w-xs mx-auto">Access real-time circular logs and college intelligence through an autonomous conversational terminal.</p>
+            <div class="space-y-3">
+                <div class="inline-flex items-center justify-center px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-[10px] font-semibold text-blue-400 tracking-wider uppercase mb-1">
+                    Academic Engine
                 </div>
-                
-                <div class="pt-4">
-                    <button id="btn-login" class="w-full flex items-center justify-center gap-3 bg-white text-slate-900 font-bold py-3.5 px-5 rounded-2xl hover:bg-slate-100 hover:scale-[1.01] active:scale-[0.99] transition duration-200 shadow-xl cursor-pointer">
-                        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-5 h-5" alt="Google Logo">
-                        Sign in with Google
-                    </button>
-                </div>
-                
-                <p id="login-error" class="text-red-400 text-xs mt-4 hidden bg-red-950/30 border border-red-900/30 p-3 rounded-xl"></p>
-
-                <!-- Forgot Password Action Link -->
-                <div class="pt-2">
-                    <a href="#" id="link-forgot-password" class="text-xs text-blue-400 hover:text-blue-300 font-semibold hover:underline">Forgot Password?</a>
-                </div>
+                <h1 class="text-4xl font-extrabold tracking-tight text-white">KHIT <span class="bg-gradient-to-r from-blue-400 to-indigo-300 bg-clip-text text-transparent">Pulse</span></h1>
+                <p class="text-slate-400 text-sm max-w-xs mx-auto">Access real-time circular logs and college intelligence through an autonomous conversational terminal.</p>
             </div>
-
-            <!-- Password Recovery Sub-Panel -->
-            <div id="password-reset-panel" class="hidden opacity-0 transition-all duration-300 space-y-6">
-                <div class="space-y-2">
-                    <h2 class="text-2xl font-bold text-white">Recover Password</h2>
-                    <p class="text-xs text-slate-400">Enter your email address to receive a secure password recovery link.</p>
-                </div>
-                
-                <div class="space-y-2 text-left">
-                    <label for="reset-email" class="text-[10px] font-bold uppercase text-slate-400 tracking-wider">Email Address</label>
-                    <input type="email" id="reset-email" placeholder="e.g. student@khit.edu.in" class="w-full bg-slate-950/80 border border-slate-800/80 rounded-xl px-4 py-3.5 text-sm focus:outline-none focus:border-blue-500/80 text-slate-200 placeholder:text-slate-700 transition font-medium animate-transition">
-                    <p id="reset-error" class="text-red-400 text-xs mt-2 hidden"></p>
-                </div>
-
-                <div class="pt-2 space-y-3">
-                    <button id="btn-send-reset" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-sm py-3.5 px-5 rounded-2xl shadow-lg transition duration-200 hover:scale-[1.01] active:scale-[0.99] cursor-pointer">
-                        Send Reset Link
-                    </button>
-                    <button id="btn-back-to-login" class="w-full bg-slate-900 hover:bg-slate-800 text-slate-400 font-semibold text-xs py-3 px-6 rounded-xl border border-slate-800 hover:border-slate-700 transition cursor-pointer">
-                        Back to Login
-                    </button>
-                </div>
+            
+            <div class="pt-4">
+                <button id="btn-login" class="w-full flex items-center justify-center gap-3 bg-white text-slate-900 font-bold py-3.5 px-5 rounded-2xl hover:bg-slate-100 hover:scale-[1.01] active:scale-[0.99] transition duration-200 shadow-xl cursor-pointer">
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-5 h-5" alt="Google Logo">
+                    Sign in with Google
+                </button>
             </div>
-
-            <!-- Success Notification Panel -->
-            <div id="reset-success-panel" class="hidden opacity-0 transition-all duration-300 space-y-6">
-                <div class="w-12 h-12 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mx-auto text-xl font-bold">
-                    ✓
-                </div>
-                <div class="space-y-2">
-                    <h3 class="text-lg font-bold text-white">Reset Link Dispatched</h3>
-                    <p class="text-xs text-slate-300 px-2 leading-relaxed">Password reset secure link has been dispatched to your inbox. Check spam if not received.</p>
-                </div>
-                <div class="pt-2">
-                    <button id="btn-success-dismiss" class="w-full bg-white text-slate-900 font-bold py-3 px-5 rounded-2xl hover:bg-slate-100 transition duration-200 cursor-pointer">
-                        Return to Login
-                    </button>
-                </div>
-            </div>
+            
+            <p id="login-error" class="text-red-400 text-xs mt-4 hidden bg-red-950/30 border border-red-900/30 p-3 rounded-xl"></p>
             
             <div class="text-[10px] text-slate-500 pt-2 font-medium tracking-wide">
                 Kallam Haranadhareddy Institute of Technology
