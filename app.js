@@ -171,6 +171,9 @@ document.addEventListener("DOMContentLoaded", () => {
     let btnCloseVoice;
     try { btnCloseVoice = document.getElementById("btn-close-voice"); } catch (e) { console.warn("Selector error 'btn-close-voice':", e); }
     
+    let voiceLogoContainer;
+    try { voiceLogoContainer = document.getElementById("voice-logo-container"); } catch (e) { console.warn("Selector error 'voice-logo-container':", e); }
+    
     let voiceOverlayCaptions;
     try { voiceOverlayCaptions = document.getElementById("voice-overlay-captions"); } catch (e) { console.warn("Selector error 'voice-overlay-captions':", e); }
     
@@ -698,7 +701,9 @@ Answer the query now. Keep your tone helpful, professional, and precise. Use Mar
                 removeTypingIndicator(indicator);
                 appendStreamingBubble(responseText, () => {
                     setLogoProcessing(false);
-                    vocalizeResponse(responseText);
+                    if (voiceModeOverlayActive) {
+                        vocalizeResponse(responseText);
+                    }
                 });
             },
             (err) => {
@@ -706,7 +711,9 @@ Answer the query now. Keep your tone helpful, professional, and precise. Use Mar
                 const fallbackText = fallbackLocalModel(text);
                 appendStreamingBubble(fallbackText, () => {
                     setLogoProcessing(false);
-                    vocalizeResponse(fallbackText);
+                    if (voiceModeOverlayActive) {
+                        vocalizeResponse(fallbackText);
+                    }
                 });
             }
         );
@@ -1315,6 +1322,17 @@ function solve(input) {
             }
             
             window.speechSynthesis.cancel();
+        });
+    }
+
+    if (voiceLogoContainer) {
+        voiceLogoContainer.addEventListener("click", () => {
+            if (voiceModeOverlayActive) {
+                // Cancel active speaking to start listening immediately
+                window.speechSynthesis.cancel();
+                // Trigger wake animation and active capture
+                triggerWakeActivation();
+            }
         });
     }
 
