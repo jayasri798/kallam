@@ -1,5 +1,17 @@
 /* SYSTEM COMPONENT: styles.css */
-/* Target Focus: Gemini Minimalism, Modern Dynamic Transitions & Keyframe Ripples */
+/* Target Focus: VOXA Retro-Futuristic Pixel & Glassmorphic Design System */
+
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Silkscreen:wght@400;700&display=swap');
+
+:root {
+    --bg-primary: #040404;
+    --accent-cobalt: #0147a3;
+    --accent-cyan: #5aa2fa;
+    --font-body: 'Space Grotesk', sans-serif;
+    --font-header: 'Silkscreen', monospace;
+    --glass-bg: rgba(255, 255, 255, 0.02);
+    --glass-border: rgba(255, 255, 255, 0.05);
+}
 
 /* Custom global browser scrollbar overrides */
 ::-webkit-scrollbar {
@@ -12,44 +24,58 @@
 }
 
 ::-webkit-scrollbar-thumb {
-    background: #1e293b;
+    background: #121212;
     border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: #334155;
+    background: var(--accent-cobalt);
 }
 
-/* Base resets & layout settings to prevent browser shifting */
+/* Base resets & layout settings */
 html, body {
     height: 100%;
     margin: 0;
     padding: 0;
     overflow: hidden;
-    background-color: #020617;
-    font-family: 'Outfit', sans-serif;
+    background-color: var(--bg-primary) !important;
+    font-family: var(--font-body);
     color-scheme: dark;
-    scrollbar-gutter: stable; /* Establish global layout reset to prevent browser shifting */
+    scrollbar-gutter: stable;
 }
 
-/* Glassmorphism surfaces */
+.font-pixel {
+    font-family: var(--font-header) !important;
+}
+
+.font-grotesk {
+    font-family: var(--font-body) !important;
+}
+
+/* Glassmorphism containers */
 .glass-surface {
-    background: rgba(15, 23, 42, 0.4);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.03);
+    background: var(--glass-bg) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    border: 1px solid var(--glass-border) !important;
 }
 
 /* Suggestion Card Interactions */
 .suggestion-card {
+    background: var(--glass-bg) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    border: 1px solid var(--glass-border) !important;
     transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
+
 .suggestion-card:hover {
-    transform: translateY(-2px);
-    background-color: rgba(30, 41, 59, 0.35);
-    border-color: rgba(59, 130, 246, 0.3);
-    box-shadow: 0 4px 20px rgba(59, 130, 246, 0.04);
+    transform: translateY(-3px);
+    background-color: rgba(90, 162, 250, 0.04) !important;
+    border-color: rgba(90, 162, 250, 0.35) !important;
+    box-shadow: 0 8px 24px rgba(1, 71, 163, 0.25);
 }
+
 .suggestion-card:active {
     transform: translateY(0);
 }
@@ -58,7 +84,7 @@ html, body {
 @keyframes cascadeIn {
     0% {
         opacity: 0;
-        transform: translateY(14px) scale(0.985);
+        transform: translateY(12px) scale(0.99);
     }
     100% {
         opacity: 1;
@@ -74,48 +100,48 @@ html, body {
 @keyframes mic-ring-pulse {
     0% {
         transform: scale(1);
-        box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.5);
+        box-shadow: 0 0 0 0 rgba(90, 162, 250, 0.4);
         opacity: 1;
     }
     100% {
         transform: scale(2.2);
-        box-shadow: 0 0 0 16px rgba(34, 197, 94, 0);
+        box-shadow: 0 0 0 16px rgba(90, 162, 250, 0);
         opacity: 0;
     }
 }
 
 .mic-active-ring {
     animation: mic-ring-pulse 1.8s cubic-bezier(0.16, 1, 0.3, 1) infinite;
-    border: 1px solid rgba(34, 197, 94, 0.4);
+    border: 1px solid rgba(90, 162, 250, 0.4);
 }
 
-/* Glowing green pulse for the button itself */
-@keyframes mic-glow-green {
+/* Glowing blue pulse for active state */
+@keyframes mic-glow-blue {
     0%, 100% {
-        border-color: rgba(34, 197, 94, 0.5);
-        background-color: rgba(34, 197, 94, 0.1);
-        box-shadow: 0 0 10px rgba(34, 197, 94, 0.2);
+        border-color: rgba(90, 162, 250, 0.5);
+        background-color: rgba(1, 71, 163, 0.1);
+        box-shadow: 0 0 12px rgba(90, 162, 250, 0.2);
     }
     50% {
-        border-color: rgba(34, 197, 94, 0.8);
-        background-color: rgba(34, 197, 94, 0.2);
-        box-shadow: 0 0 20px rgba(34, 197, 94, 0.5);
+        border-color: rgba(90, 162, 250, 0.8);
+        background-color: rgba(1, 71, 163, 0.3);
+        box-shadow: 0 0 24px rgba(90, 162, 250, 0.5);
     }
 }
 
 .mic-active-ball {
-    animation: mic-glow-green 1.8s ease-in-out infinite;
+    animation: mic-glow-blue 1.8s ease-in-out infinite;
 }
 
 /* Inactive breathing state */
 @keyframes mic-breath-blue {
     0%, 100% {
-        border-color: rgba(59, 130, 246, 0.2);
-        box-shadow: 0 0 8px rgba(59, 130, 246, 0.05);
+        border-color: rgba(1, 71, 163, 0.2);
+        box-shadow: 0 0 8px rgba(1, 71, 163, 0.05);
     }
     50% {
-        border-color: rgba(59, 130, 246, 0.4);
-        box-shadow: 0 0 16px rgba(59, 130, 246, 0.2);
+        border-color: rgba(90, 162, 250, 0.3);
+        box-shadow: 0 0 16px rgba(90, 162, 250, 0.15);
     }
 }
 
@@ -125,17 +151,21 @@ html, body {
 
 /* Avatar Border Glow Effect */
 .avatar-glow {
-    box-shadow: 0 0 10px rgba(59, 130, 246, 0.15);
-    border: 1px solid rgba(59, 130, 246, 0.3);
+    box-shadow: 0 0 10px rgba(90, 162, 250, 0.15);
+    border: 1px solid rgba(90, 162, 250, 0.3);
 }
 
 /* Circular item transitions */
 .circular-item {
+    background: var(--glass-bg) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    border: 1px solid var(--glass-border) !important;
     transition: all 0.2s ease;
 }
 .circular-item:hover {
-    background-color: rgba(30, 41, 59, 0.3);
-    border-color: rgba(148, 163, 184, 0.12);
+    background-color: rgba(90, 162, 250, 0.03) !important;
+    border-color: rgba(90, 162, 250, 0.2) !important;
 }
 
 /* Sidebar Collapsed State Class */
@@ -151,8 +181,8 @@ html, body {
     width: 6px;
     height: 6px;
     border-radius: 9999px;
-    background-color: #3b82f6;
-    color: #3b82f6;
+    background-color: var(--accent-cyan);
+    color: var(--accent-cyan);
     animation: dot-flashing 1s infinite linear alternate;
     animation-delay: 0.5s;
 }
@@ -167,8 +197,8 @@ html, body {
     width: 6px;
     height: 6px;
     border-radius: 9999px;
-    background-color: #3b82f6;
-    color: #3b82f6;
+    background-color: var(--accent-cyan);
+    color: var(--accent-cyan);
     animation: dot-flashing 1s infinite alternate;
     animation-delay: 0s;
 }
@@ -177,20 +207,18 @@ html, body {
     width: 6px;
     height: 6px;
     border-radius: 9999px;
-    background-color: #3b82f6;
-    color: #3b82f6;
+    background-color: var(--accent-cyan);
+    color: var(--accent-cyan);
     animation: dot-flashing 1s infinite alternate;
     animation-delay: 1s;
 }
 
 @keyframes dot-flashing {
-    0% { background-color: #3b82f6; }
-    50%, 100% { background-color: rgba(59, 130, 246, 0.15); }
+    0% { background-color: var(--accent-cyan); }
+    50%, 100% { background-color: rgba(90, 162, 250, 0.15); }
 }
 
 /* --- Official KHIT Logo Animations and Micro-Interactions --- */
-
-/* Float wrapper handles clean Y-axis float simulating an AI orb */
 .khit-logo-float-wrapper {
     display: inline-flex;
     animation: logo-float-premium 3.8s cubic-bezier(0.25, 1, 0.5, 1) infinite alternate;
@@ -198,12 +226,11 @@ html, body {
     transform: translateZ(0);
 }
 
-/* Container handles border, relative layout, dimensions, and hover shadow glow */
 .khit-logo-container {
     position: relative;
     border-radius: 50%;
     background-color: #ffffff;
-    border: 2.5px solid rgba(59, 130, 246, 0.45);
+    border: 2.5px solid rgba(90, 162, 250, 0.4);
     overflow: hidden;
     display: flex;
     align-items: center;
@@ -217,7 +244,6 @@ html, body {
     transform: translateZ(0);
 }
 
-/* Logo Sizes */
 .logo-size-sm {
     width: 38px;
     height: 38px;
@@ -229,35 +255,25 @@ html, body {
     border-width: 3.5px;
 }
 
-/* Outer rotating gear layer - isolated by explicit CSS mask layer */
 .khit-logo-outer {
     position: absolute;
     inset: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    
-    /* Radial gradient mask: hides the center, reveals only the outer gear teeth + text boundary */
     -webkit-mask-image: radial-gradient(circle, transparent 36%, black 38%);
     mask-image: radial-gradient(circle, transparent 36%, black 38%);
-    
-    /* Locked stationary by default */
     transform: rotate(0deg) translateZ(0);
     will-change: transform;
 }
 
-/* Inner stationary globe + book layer */
 .khit-logo-inner {
     position: absolute;
     inset: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    
-    /* Circular clip-path: crops out the outer gear/text, keeping only the center globe/book */
     clip-path: circle(35% at 50% 50%);
-    
-    /* Rotation locked to 0deg */
     transform: rotate(0deg) translateZ(0);
     z-index: 2;
 }
@@ -270,8 +286,6 @@ html, body {
 }
 
 /* Animations */
-
-/* 1. Continuous Floating along Y-axis - premium vertical cubic-bezier curve */
 @keyframes logo-float-premium {
     0% {
         transform: translateY(3px) translateZ(0);
@@ -281,7 +295,6 @@ html, body {
     }
 }
 
-/* 2. Anti-clockwise rotation */
 @keyframes gear-spin-left {
     from {
         transform: rotate(0deg);
@@ -291,35 +304,30 @@ html, body {
     }
 }
 
-/* 3. Hover Interaction: Scale up 5% + emerald glow shadow */
 .khit-logo-container:hover {
     transform: scale(1.05) translateZ(0);
-    border-color: rgba(16, 185, 129, 0.75);
-    box-shadow: 0 0 25px 6px rgba(16, 185, 129, 0.65), 0 0 12px 2px rgba(59, 130, 246, 0.3);
-    cursor: pointer;
+    border-color: var(--accent-cyan);
+    box-shadow: 0 0 25px 6px rgba(90, 162, 250, 0.5), 0 0 12px 2px rgba(1, 71, 163, 0.3);
 }
 
-/* 4. Active AI Processing State (Logo gear rotates at high speed, glows emerald) */
 .logo-processing-active, .processing-active {
-    border-color: rgba(16, 185, 129, 0.75) !important;
-    box-shadow: 0 0 25px 6px rgba(16, 185, 129, 0.65), 0 0 12px 2px rgba(59, 130, 246, 0.3) !important;
+    border-color: var(--accent-cyan) !important;
+    box-shadow: 0 0 25px 6px rgba(90, 162, 250, 0.5), 0 0 12px 2px rgba(1, 71, 163, 0.3) !important;
 }
 
 .logo-processing-active .khit-logo-outer, .processing-active .khit-logo-outer {
-    /* High-speed anti-clockwise rotate only during processing */
     animation: gear-spin-left 2.2s linear infinite !important;
 }
 
-/* --- Admin Panel Drag and Drop & Glow Transition --- */
-
+/* --- Admin Panel Drag and Drop --- */
 @keyframes neon-glow-pulse {
     0%, 100% {
-        border-color: rgba(59, 130, 246, 0.7);
-        box-shadow: 0 0 15px rgba(59, 130, 246, 0.35), inset 0 0 8px rgba(59, 130, 246, 0.1);
+        border-color: rgba(90, 162, 250, 0.7);
+        box-shadow: 0 0 15px rgba(90, 162, 250, 0.35), inset 0 0 8px rgba(90, 162, 250, 0.1);
     }
     50% {
-        border-color: rgba(99, 102, 241, 0.9);
-        box-shadow: 0 0 25px rgba(99, 102, 241, 0.6), inset 0 0 15px rgba(99, 102, 241, 0.25);
+        border-color: rgba(1, 71, 163, 0.9);
+        box-shadow: 0 0 25px rgba(1, 71, 163, 0.6), inset 0 0 15px rgba(1, 71, 163, 0.25);
     }
 }
 
@@ -332,17 +340,17 @@ html, body {
 
 #drag-drop-zone.drag-hover {
     animation: neon-glow-pulse 2s infinite ease-in-out;
-    background-color: rgba(59, 130, 246, 0.05);
+    background-color: rgba(90, 162, 250, 0.05);
     border-style: solid;
 }
 
 #drag-drop-zone:hover {
-    border-color: rgba(59, 130, 246, 0.85);
-    box-shadow: 0 0 18px rgba(59, 130, 246, 0.4);
-    background-color: rgba(59, 130, 246, 0.02);
+    border-color: var(--accent-cyan);
+    box-shadow: 0 0 18px rgba(90, 162, 250, 0.3);
+    background-color: rgba(255, 255, 255, 0.01);
 }
 
-/* Styling for Notice Title text input */
+/* Notice Title */
 #notice-title {
     transition: border-color 0.3s cubic-bezier(0.16, 1, 0.3, 1), 
                 box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1), 
@@ -350,30 +358,29 @@ html, body {
 }
 
 #notice-title:focus {
-    border-color: rgba(59, 130, 246, 0.85) !important;
-    box-shadow: 0 0 15px rgba(59, 130, 246, 0.3) !important;
-    background-color: rgba(2, 6, 23, 0.9) !important;
+    border-color: var(--accent-cyan) !important;
+    box-shadow: 0 0 15px rgba(90, 162, 250, 0.3) !important;
+    background-color: #000000 !important;
 }
 
-/* Green pulse shadow animation around logo container */
 @keyframes logo-green-pulse {
     0% {
-        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7), 0 0 10px rgba(16, 185, 129, 0.3);
+        box-shadow: 0 0 0 0 rgba(90, 162, 250, 0.7), 0 0 10px rgba(90, 162, 250, 0.3);
     }
     70% {
-        box-shadow: 0 0 0 15px rgba(16, 185, 129, 0), 0 0 20px 4px rgba(16, 185, 129, 0.5);
+        box-shadow: 0 0 0 15px rgba(90, 162, 250, 0), 0 0 20px 4px rgba(90, 162, 250, 0.5);
     }
     100% {
-        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0), 0 0 10px rgba(16, 185, 129, 0.1);
+        box-shadow: 0 0 0 0 rgba(90, 162, 250, 0), 0 0 10px rgba(90, 162, 250, 0.1);
     }
 }
 
 .logo-wake-active {
     animation: logo-green-pulse 1.2s cubic-bezier(0.16, 1, 0.3, 1) infinite !important;
-    border-color: rgba(16, 185, 129, 0.8) !important;
+    border-color: var(--accent-cyan) !important;
 }
 
-/* Voice Mode Overlay transitions - fades smoothly into view when triggered */
+/* Voice Mode Overlay transitions */
 #voice-overlay {
     transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -381,4 +388,20 @@ html, body {
 #voice-overlay.voice-overlay-active {
     opacity: 1 !important;
     visibility: visible !important;
+}
+
+/* Flat white sign in button with subtle outer border that expands/grows on hover */
+#btn-login {
+    position: relative;
+    background-color: #ffffff !important;
+    color: #040404 !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    outline: 0px solid rgba(90, 162, 250, 0) !important;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+#btn-login:hover {
+    outline: 4px solid var(--accent-cyan) !important;
+    outline-offset: 2px !important;
+    transform: scale(1.02) !important;
 }
