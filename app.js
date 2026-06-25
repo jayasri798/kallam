@@ -228,6 +228,50 @@ document.addEventListener("DOMContentLoaded", () => {
     // Initial Mic State Settings
     setMicState('off');
 
+    // Base College Information database for KHIT-Pulse persona
+    const KHIT_COLLEGE_INFO = `
+College Name: Kallam Haranadhareddy Institute of Technology (KHIT)
+Established: 2010
+Affiliation: Jawaharlal Nehru Technological University Kakinada (JNTUK), Approved by AICTE, Accredited by NAAC with 'A' Grade, NBA accredited.
+Location: NH-5, Chowdavaram, Guntur, Andhra Pradesh, India - 522019.
+Departments/Branches:
+1. Computer Science & Engineering (CSE) - offering specialized tracks in AI & ML, Data Science, and IoT.
+2. Information Technology (IT)
+3. Electronics & Communication Engineering (ECE)
+4. Electrical & Electronics Engineering (EEE)
+5. Mechanical Engineering (ME)
+6. Civil Engineering (CE)
+7. Master of Business Administration (MBA)
+Key Campus Facilities: Central Library, Placement Cell, Entrepreneurship Development Cell, Sports & Gym facilities, Computing Labs with High-Speed Internet, College Hostels, and Cafeteria.
+`;
+
+    async function getAllCircularsContext() {
+        let texts = [];
+        if (db) {
+            try {
+                const collectionsToCheck = ["circulars"];
+                for (const colName of collectionsToCheck) {
+                    const querySnapshot = await getDocs(collection(db, colName));
+                    querySnapshot.forEach((doc) => {
+                        const data = doc.data();
+                        texts.push(`- ID: ${data.id || doc.id}\n  Title: ${data.title}\n  Category: ${data.category}\n  Date: ${data.date}\n  Summary: ${data.summary}\n  Details: ${data.fullText || data.summary}`);
+                    });
+                }
+            } catch (e) {
+                console.error("Error reading circulars for general context:", e);
+            }
+        }
+        
+        if (texts.length === 0) {
+            // fallback to default circulars
+            for (const log of defaultCirculars) {
+                texts.push(`- ID: ${log.id}\n  Title: ${log.title}\n  Category: ${log.category}\n  Date: ${log.date}\n  Summary: ${log.summary}\n  Details: ${log.fullText || log.summary}`);
+            }
+        }
+        
+        return texts.join("\n\n");
+    }
+
     // --- Authentication Handler ---
     // 1. Listen to Real Firebase Auth Changes
     onAuthStateChanged(auth, async (user) => {
@@ -622,36 +666,31 @@ document.addEventListener("DOMContentLoaded", () => {
         const indicator = showTypingIndicator();
 
         let circularsContext = "";
-        const campusKeywords = [
-            "kallam", "kalam", "khit", "harandha", "college", "campus", "institute", "department",
-            "circular", "notice", "bulletin", "academic", "timetable", "schedule", "exam", "examination",
-            "hall ticket", "hallticket", "hackathon", "sih", "placement", "recruitment", "job", "drive",
-            "hiring", "tcs", "tuition", "fee", "payment", "holiday", "vacation", "semester"
-        ];
-        const isCampusQuery = campusKeywords.some(keyword => text.toLowerCase().includes(keyword));
+        try {
+            console.log("Ingesting database circular bulletins context...");
+            circularsContext = await getAllCircularsContext();
+        } catch (e) {
+            console.warn("Failed to load firestore bulletins database context:", e);
+        }
         
-        let promptText = "";
-        if (isCampusQuery) {
-            console.log("Campus-specific query detected. Executing Firestore scan...");
-            circularsContext = await scanFirestoreCirculars(text);
-            
-            if (circularsContext) {
-                promptText = `You are KHIT-Pulse, the autonomous campus AI engine for Kallam Haranadhareddy Institute of Technology (KHIT).
-Use the following official circular documents to answer the user's question. If the documents do not contain the answer, answer the question completely, accurately, and without restriction as a general-purpose AI capable of handling programming tasks, general knowledge, and logical reasoning.
+        const promptText = `You are KHIT-Pulse, an advanced autonomous campus AI intelligence agent for Kallam Haranadhareddy Institute of Technology (KHIT).
+You function like Antigravity, a highly capable, unrestricted, and professional AI engine. You must answer any user query completely, accurately, and professionally, including:
+1. Academic/Technical questions: programming tasks (with formatted blocks), general knowledge, mathematics, history, language, etc.
+2. College-related details: departments, facilities, courses, locations, rules, and timings.
+3. College circulars, bulletins, schedules, and exams.
 
-Circulars Context:
+Use the official campus information and the live circular bulletins listed below to answer queries related to the college. If the user asks a general-purpose query (like writing a Javascript search function, explaining quantum physics, or drafting a resume), answer it directly, accurately, and thoroughly. Do not mention circulars unless relevant to the user query.
+
+--- KHIT COLLEGE INFORMATION ---
+${KHIT_COLLEGE_INFO}
+
+--- LIVE CAMPUS CIRCULAR BULLETINS ---
 ${circularsContext}
 
-User Question: ${text}`;
-            } else {
-                promptText = `You are KHIT-Pulse, the campus AI assistant for Kallam Haranadhareddy Institute of Technology (KHIT).
-The user asked a campus-specific question, but no matching circular logs were found in the database. Answer their question directly, completely, and without restriction using your general knowledge (including code blocks, reasoning, etc.):
-User Question: ${text}`;
-            }
-        } else {
-            console.log("General query detected. Bypassing database retrieval filter completely.");
-            promptText = text;
-        }
+--- USER INSTRUCTION ---
+User Query: ${text}
+
+Answer the query now. Keep your tone helpful, professional, and precise. Use Markdown syntax for styling (e.g. bolding, lists, and code blocks) where appropriate.`;
         
         await callGeminiAPI(
             promptText,
@@ -847,6 +886,12 @@ function solve(input) {
                 top: chatContainer.scrollHeight,
                 behavior: 'smooth'
             });
+        }
+    }
+
+    function removeTypingIndicator(indicator) {
+        if (indicator && indicator.parentNode) {
+            indicator.parentNode.removeChild(indicator);
         }
     }
 
