@@ -348,7 +348,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         
         if (btnAdminToggle) {
-            if (user && user.accountRole === "admin") {
+            if (user && (user.accountRole === "admin" || window.location.hash === "#admin")) {
                 btnAdminToggle.classList.remove("hidden");
             } else {
                 btnAdminToggle.classList.add("hidden");
@@ -600,9 +600,11 @@ User Question: ${text}`;
                         const data = doc.data();
                         const title = (data.title || "").toLowerCase();
                         const summary = (data.summary || "").toLowerCase();
+                        const fullText = (data.fullText || "").toLowerCase();
                         if (q.includes(title) || title.split(" ").some(word => word.length > 3 && q.includes(word)) ||
-                            q.includes(summary) || summary.split(" ").some(word => word.length > 3 && q.includes(word))) {
-                            matchedTexts.push(`[Circular Document ${data.id || doc.id}]: ${data.title} - ${data.summary}`);
+                            q.includes(summary) || summary.split(" ").some(word => word.length > 3 && q.includes(word)) ||
+                            q.includes(fullText) || fullText.split(" ").some(word => word.length > 3 && q.includes(word))) {
+                            matchedTexts.push(`[Circular Document ${data.id || doc.id}]: ${data.title} - ${data.summary}. Details: ${data.fullText || data.summary}`);
                         }
                     });
                 }
@@ -615,9 +617,11 @@ User Question: ${text}`;
             for (const log of defaultCirculars) {
                 const title = log.title.toLowerCase();
                 const summary = log.summary.toLowerCase();
+                const fullText = (log.fullText || "").toLowerCase();
                 if (q.includes(title) || title.split(" ").some(word => word.length > 3 && q.includes(word)) ||
-                    q.includes(summary) || summary.split(" ").some(word => word.length > 3 && q.includes(word))) {
-                    matchedTexts.push(`[Circular Document ${log.id}]: ${log.title} - ${log.summary}`);
+                    q.includes(summary) || summary.split(" ").some(word => word.length > 3 && q.includes(word)) ||
+                    q.includes(fullText) || fullText.split(" ").some(word => word.length > 3 && q.includes(word))) {
+                    matchedTexts.push(`[Circular Document ${log.id}]: ${log.title} - ${log.summary}. Details: ${log.fullText || log.summary}`);
                 }
             }
         }
@@ -1175,14 +1179,14 @@ function solve(input) {
     }
 
     function handleFileSelect(file) {
-        const validExtensions = ["txt", "pdf"];
+        const validExtensions = ["txt", "pdf", "jpg", "jpeg", "png"];
         const fileExt = file.name.split(".").pop().toLowerCase();
         
         if (!validExtensions.includes(fileExt)) {
-            showToast("Invalid file type! Please upload only .txt or .pdf files.");
+            showToast("Invalid file type! Please upload .txt, .pdf, or image files (.png, .jpg, .jpeg).");
             selectedFile = null;
             if (uploadStatusText) {
-                uploadStatusText.innerHTML = `Drag & drop notice document here, or <span class="text-blue-400 font-bold hover:underline">browse</span>`;
+                uploadStatusText.innerHTML = `Drag & drop notice document here, or <span class="text-[#5aa2fa] font-bold hover:underline">browse</span>`;
             }
             return;
         }
@@ -1236,30 +1240,141 @@ function solve(input) {
         });
     }
 
+    function readFileAsBase64(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = (e) => reject(e);
+            reader.readAsDataURL(file);
+        });
+    }
+
+    function readFileAsText(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = (e) => reject(e);
+            reader.readAsText(file);
+        });
+    }
+
+    async function analyzeCircularFile(file, originalTitle) {
+        const apiKey = firebaseConfig.apiKey;
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+        
+        const fileExt = file.name.split(".").pop().toLowerCase();
+        const isImage = ["jpg", "jpeg", "png"].includes(fileExt);
+        
+        let requestBody = {};
+        
+        const prompt = `Analyze this college circular document (uploaded with user reference title: "${originalTitle}").
+Extract all readable text, titles, dates, and summaries from it.
+Return a valid JSON object matching this exact schema:
+{
+  "title": "The exact official title/heading of the circular",
+  "date": "The date of issue mentioned, formatted like 'Month Day, Year'",
+  "category": "One of: 'Academic', 'Event', 'Placement', 'Finance', 'Official'",
+  "summary": "A clean 1-2 sentence description of the notice details",
+  "fullText": "The complete word-for-word transcribed text from the document"
+}
+Ensure the output is ONLY a valid JSON object, without any markdown code blocks, backticks, or other formatting text. Just raw JSON.`;
+
+        if (isImage) {
+            const base64DataUrl = await readFileAsBase64(file);
+            const base64Content = base64DataUrl.split(",")[1];
+            const mimeType = base64DataUrl.split(";")[0].split(":")[1];
+            
+            requestBody = {
+                contents: [{
+                    parts: [
+                        { text: prompt },
+                        {
+                            inlineData: {
+                                mimeType: mimeType,
+                                data: base64Content
+                            }
+                        }
+                    ]
+                }]
+            };
+        } else {
+            const fileText = await readFileAsText(file);
+            requestBody = {
+                contents: [{
+                    parts: [
+                        { text: `${prompt}\n\nDocument Text Content:\n${fileText}` }
+                    ]
+                }]
+            };
+        }
+        
+        const response = await fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(requestBody)
+        });
+        
+        if (!response.ok) {
+            throw new Error(`API error: ${response.status} ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        let rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+        
+        rawText = rawText.replace(/```json/g, "").replace(/```/g, "").trim();
+        
+        console.log("Parsed circular raw JSON response:", rawText);
+        return JSON.parse(rawText);
+    }
+
     async function completeUpload(title, file) {
         const id = `CIRC-${new Date().getFullYear()}-${Math.floor(100 + Math.random() * 900)}`;
         const dateOptions = { month: 'long', day: 'numeric', year: 'numeric' };
         const formattedDate = new Date().toLocaleDateString('en-US', dateOptions);
-        const summary = `Official notice document (${file.name}) uploaded by Administrator. File size: ${(file.size / 1024).toFixed(1)} KB. Download/view contents under circulars registry.`;
         
-        const newCircular = {
+        let circularData = {
             id: id,
             title: title,
             category: "Official",
             date: formattedDate,
-            summary: summary,
+            summary: `Official document notice (${file.name}) uploaded by Administrator.`,
+            fullText: `Notice details from file: ${file.name}.`,
             urgent: true,
             timestamp: Date.now()
         };
+        
+        try {
+            console.log("Running AI analysis / OCR on uploaded file...");
+            const aiResult = await analyzeCircularFile(file, title);
+            if (aiResult) {
+                circularData.title = aiResult.title || circularData.title;
+                circularData.date = aiResult.date || circularData.date;
+                circularData.category = aiResult.category || circularData.category;
+                circularData.summary = aiResult.summary || circularData.summary;
+                circularData.fullText = aiResult.fullText || aiResult.summary;
+            }
+            console.log("AI analysis successful. Ingesting structured data:", circularData);
+        } catch (aiErr) {
+            console.warn("AI circular analysis failed, falling back to default metadata:", aiErr);
+            if (file.name.endsWith(".txt")) {
+                try {
+                    const txt = await readFileAsText(file);
+                    circularData.fullText = txt;
+                    circularData.summary = txt.substring(0, 150) + "...";
+                } catch(e) {}
+            }
+        }
 
         try {
-            await setDoc(doc(db, "circulars", id), newCircular);
-            await setDoc(doc(db, "uploaded_circulars", id), newCircular);
+            await setDoc(doc(db, "circulars", id), circularData);
+            await setDoc(doc(db, "uploaded_circulars", id), circularData);
             showToast("Notice published successfully to Cloud Firestore!");
         } catch (err) {
             console.error("Failed to write circular to Firestore:", err);
             showToast("Error writing to database. Saving locally instead.");
-            defaultCirculars.unshift(newCircular);
+            defaultCirculars.unshift(circularData);
             renderCircularLogs(defaultCirculars);
         }
 
