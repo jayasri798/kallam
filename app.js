@@ -7,6 +7,7 @@ import {
     getAuth, 
     signInWithPopup, 
     signInWithRedirect,
+    getRedirectResult,
     GoogleAuthProvider, 
     onAuthStateChanged, 
     signOut,
@@ -47,6 +48,21 @@ document.addEventListener("DOMContentLoaded", () => {
     provider.setCustomParameters({ prompt: 'select_account' });
 
     console.log("Firebase Cloud Stream initialized manually within DOMContentLoaded.");
+
+    // Handle redirect result diagnostic catch
+    getRedirectResult(auth)
+        .then((result) => {
+            if (result) {
+                console.log("Redirect sign-in successful. User:", result.user.email);
+            }
+        })
+        .catch((error) => {
+            console.error("Redirect sign-in error details:", error);
+            if (loginError) {
+                loginError.textContent = `Redirect sign-in failed: ${error.message}`;
+                loginError.classList.remove("hidden");
+            }
+        });
     // UI Elements wrapped in try-catch to prevent freezes
     let loginScreen;
     try { loginScreen = document.getElementById("login-screen"); } catch (e) { console.warn("Selector error 'login-screen':", e); }
