@@ -1213,12 +1213,35 @@ function solve(input) {
         const plainText = htmlText.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ');
         const utterance = new SpeechSynthesisUtterance(plainText);
         
+        // Increase speed slightly (1.15x) and raise pitch to 1.15 for a clear, cute voice tone
+        utterance.rate = 1.15;
+        utterance.pitch = 1.15;
+        
         utterance.lang = 'en-IN';
         
         const voices = window.speechSynthesis.getVoices();
-        const inVoice = voices.find(voice => voice.lang.includes('en-IN') || voice.lang.includes('en_IN'));
-        if (inVoice) {
-            utterance.voice = inVoice;
+        
+        // Prefer premium female voices (like Samantha on macOS/iOS, Google US English/Google UK English Female on Chrome, or Microsoft Zira on Windows)
+        let selectedVoice = voices.find(v => v.lang.includes('en-IN') && v.name.toLowerCase().includes('google'));
+        if (!selectedVoice) {
+            selectedVoice = voices.find(v => v.name.includes('Samantha') || v.name.includes('Google US English') || v.name.includes('Google UK English Female') || v.name.includes('Microsoft Zira'));
+        }
+        if (!selectedVoice) {
+            selectedVoice = voices.find(v => v.lang.includes('en-IN') || v.lang.includes('en_IN'));
+        }
+        if (!selectedVoice) {
+            selectedVoice = voices.find(v => {
+                const name = v.name.toLowerCase();
+                return name.includes('female') || name.includes('girl') || name.includes('zira') || name.includes('hazel') || name.includes('samantha');
+            });
+        }
+        if (!selectedVoice) {
+            selectedVoice = voices.find(v => v.lang.startsWith('en'));
+        }
+        
+        if (selectedVoice) {
+            utterance.voice = selectedVoice;
+            console.log("Selected voice for speech synthesis:", selectedVoice.name);
         }
         
         utterance.onend = () => {
