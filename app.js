@@ -253,19 +253,59 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Base College Information database for KHIT-Pulse persona
     const KHIT_COLLEGE_INFO = `
-College Name: Kallam Haranadhareddy Institute of Technology (KHIT)
-Established: 2010
-Affiliation: Jawaharlal Nehru Technological University Kakinada (JNTUK), Approved by AICTE, Accredited by NAAC with 'A' Grade, NBA accredited.
-Location: NH-5, Chowdavaram, Guntur, Andhra Pradesh, India - 522019.
-Departments/Branches:
-1. Computer Science & Engineering (CSE) - offering specialized tracks in AI & ML, Data Science, and IoT.
-2. Information Technology (IT)
-3. Electronics & Communication Engineering (ECE)
-4. Electrical & Electronics Engineering (EEE)
-5. Mechanical Engineering (ME)
-6. Civil Engineering (CE)
-7. Master of Business Administration (MBA)
-Key Campus Facilities: Central Library, Placement Cell, Entrepreneurship Development Cell, Sports & Gym facilities, Computing Labs with High-Speed Internet, College Hostels, and Cafeteria.
+[COLLEGE IDENTITY]
+College Full Name: Kallam Haranadhareddy Institute of Technology (KHIT)
+Establishment Year: 2010
+Affiliation: Affiliated to JNTU Kakinada (JNTUK)
+Accreditation: NAAC Accredited with 'A' Grade, AICTE approved, NBA aligned.
+Total Student Body Size: 3500+ active students on an 11-acre campus.
+Campus Location: Guntur-Chennai Highway, Dasaripalem, Guntur, Andhra Pradesh, 522019.
+Official Communication Channels: Phone: +91-9885604528 or 0863-2119726. Web: khitguntur.ac.in
+
+[ACADEMICS & INTAKE CAPACITY]
+B.Tech Seats for CSE: 540 seats available annually.
+B.Tech Seats for CSE AI-ML: 360 seats available annually.
+B.Tech Seats for ECE: 180 seats available annually.
+B.Tech Seats for IT: 180 seats available annually.
+B.Tech Seats for EEE: 60 seats available annually.
+B.Tech Seats for Civil Engineering: 30 seats available annually.
+B.Tech Seats for Mechanical Engineering: 30 seats available annually.
+Total Diploma/Polytechnic Intake: 360 seats across Computer, ECE, EEE, Civil, Mechanical.
+PG Tracks Offered: Master of Business Administration (MBA), Master of Computer Applications (MCA), and M.Tech.
+
+[ADMISSIONS & TUITION COSTS]
+Undergraduate B.Tech Admissions Criteria: Requires qualifying 10+2 with 45% marks minimum and a valid AP EAMCET rank.
+Postgraduate MBA and MCA Admission Criteria: Requires passing score in AP ICET exam.
+Diploma Admission Criteria: Requires passing 10th grade and clearing the AP POLYCET exam.
+B.Tech Tuition Fees: Approximately 41,000 INR per year through state convening allotment.
+Polytechnic Diploma Tuition Fees: Approximately 75,000 INR total program cost.
+
+[CAMPUS PLACEMENT LOGS]
+Placement Success Rate: Consistently ranges between 60 percent to 80 percent of eligible candidates.
+Highest Corporate Salary Package: Recorded at 12 Lakhs Per Annum (12 LPA).
+Average Institutional Salary Package: Varies between 3.5 LPA to 4.0 LPA, with an institutional median of 3.39 LPA.
+Primary Campus Recruitment Partners: TCS, Wipro, Infosys, Capgemini, HCL, Tech Mahindra, Amaron Batteries.
+Placement Preparation: Dedicated Campus Recruitment Training (CRT) classes begin directly in the 3rd year.
+
+[CAMPUS RECRUITMENT SPECIFICS]
+Absolute Peak Salary Package: Scaled up to 22 LPA for specialized software roles.
+Average Corporate Salary Band: Settles dynamically between 3.5 LPA and 5.5 LPA.
+MNC Placement Eligibility: Candidates require an academic score between 70 percent to 80 percent clear of active backlogs.
+Corporate Reach: Over 500 companies participate across hiring seasons.
+Training Mandate: Campus Recruitment Training (CRT) starts rigidly in the 3rd year.
+
+[HOSTEL ACCOMMODATION & AMENITIES]
+Boys Hostel Fees: Approximately 67,500 INR per year inclusive of basic non-AC room and mess billing.
+Girls Hostel Fees: Varies between 75,000 INR to 85,000 INR per year based on location tiers.
+Hostel Meal Routine: Package covers four distinct meal times daily: breakfast, lunch, snacks, and dinner.
+Gymnasium Footprint: A 300 square meter indoor area dedicated to fitness, weight lifting, table tennis, and chess.
+
+[COLLEGE MANDATES AND COMPLIANCE]
+Device Restrictions: Use of electronic gadgets is prohibited inside hostel sectors during mandatory study windows.
+Mandatory Internships: Every student must clear a 10-month aggregate industrial/social internship before final year graduation.
+Academic Flipped Classroom: Students must earn specific elective credits online via the institutional SWAYAM NPTEL local chapter.
+Social Service Mandate: All registered students must enroll in either NCC or NSS units.
+Student Supervision: A designated Faculty Advisor oversees student course registration and profile reviews.
 `;
 
     async function getAllCircularsContext() {
