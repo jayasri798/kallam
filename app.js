@@ -903,6 +903,63 @@ ${circularsContext}`;
 
     function fallbackLocalModel(queryStr) {
         const q = queryStr.toLowerCase();
+        
+        // 1. Placement / Salary Queries
+        if (q.includes("placement") || q.includes("salary") || q.includes("package") || q.includes("lpa") || q.includes("jobs") || q.includes("hiring")) {
+            return `### KHIT Placement & Recruitment Records (Local Answering Engine)
+- **Highest Salary Package:** 12 LPA (Corporate Peak up to **22 LPA** for specialized roles).
+- **Average Package:** 3.5 LPA to 5.5 LPA (Institutional Median: 3.39 LPA).
+- **Success Rate:** 60% to 80% of eligible candidates.
+- **Top Partners:** TCS, Wipro, Infosys, Capgemini, HCL, Tech Mahindra, Amaron Batteries.
+- **CRT Training:** Mandated and begins strictly in the 3rd year.
+- **Eligibility:** 70% to 80% academic score with no active backlogs for MNCs.`;
+        }
+        
+        // 2. Hostel / Gym queries
+        if (q.includes("hostel") || q.includes("room") || q.includes("mess") || q.includes("gym") || q.includes("accommodation") || q.includes("food")) {
+            return `### KHIT Hostel & Amenities (Local Answering Engine)
+- **Boys Hostel Fees:** Approximately 67,500 INR/year (includes non-AC room + mess).
+- **Girls Hostel Fees:** 75,000 INR to 85,000 INR/year (based on tier location).
+- **Meals:** 4 daily meal times (breakfast, lunch, snacks, and dinner).
+- **Gym & Fitness:** 300 sq. meter indoor area for fitness, weight lifting, table tennis, and chess.
+- **Hostel Rule:** Electronic gadgets are prohibited inside hostels during mandatory study windows.`;
+        }
+        
+        // 3. Tuition / Fees / Admissions
+        if (q.includes("fee") || q.includes("cost") || q.includes("admission") || q.includes("tuition") || q.includes("eamcet") || q.includes("polycet") || q.includes("icet")) {
+            return `### KHIT Admissions & Tuition Structure (Local Answering Engine)
+- **B.Tech Tuition Fees:** Approximately 41,000 INR per year (Convenor allotment).
+- **Polytechnic Diploma Cost:** Approximately 75,000 INR total program cost.
+- **B.Tech Admissions:** Requires 10+2 (min 45% marks) + AP EAMCET rank.
+- **MBA / MCA Admissions:** Requires a valid score in AP ICET exam.
+- **Diploma Admissions:** Requires 10th grade pass + clearing AP POLYCET.`;
+        }
+        
+        // 4. Seats / Intake / Branches
+        if (q.includes("seat") || q.includes("intake") || q.includes("cse") || q.includes("ece") || q.includes("branch") || q.includes("course") || q.includes("department")) {
+            return `### KHIT Intake Capacity & Departments (Local Answering Engine)
+- **CSE (Computer Science):** 540 seats annually.
+- **CSE AI-ML:** 360 seats annually.
+- **ECE (Electronics):** 180 seats annually.
+- **IT (Information Tech):** 180 seats annually.
+- **EEE (Electrical):** 60 seats annually.
+- **Civil Engineering:** 30 seats annually.
+- **Mechanical Engineering:** 30 seats annually.
+- **Polytechnic Diploma:** 360 seats across Computer, ECE, EEE, Civil, Mechanical.
+- **PG Programs:** MBA, MCA, M.Tech.`;
+        }
+
+        // 5. Mandates / Compliance
+        if (q.includes("mandate") || q.includes("rule") || q.includes("internship") || q.includes("nptel") || q.includes("swayam") || q.includes("ncc") || q.includes("nss") || q.includes("gadget")) {
+            return `### KHIT Academic Mandates (Local Answering Engine)
+- **Device Restrictions:** Electronic gadgets are prohibited inside hostels during mandatory study windows.
+- **Mandatory Internships:** Requires a 10-month aggregate industrial/social internship before final year graduation.
+- **NPTEL / SWAYAM:** Students must earn specific elective credits online via the local NPTEL chapter.
+- **Social Service:** Enrolling in either NCC or NSS units is mandatory.
+- **Supervision:** Faculty Advisor oversees course registration and profile reviews.`;
+        }
+
+        // 6. Programming / Code fallbacks
         if (q.includes("program") || q.includes("code") || q.includes("write a function")) {
             return `Here is a Javascript programming solution for your request:
 \`\`\`javascript
@@ -912,12 +969,15 @@ function solve(input) {
 }
 \`\`\``;
         }
-        if (q.includes("why") || q.includes("how") || q.includes("explain")) {
-            return `Based on general logical reasoning, the concept you asked about involves multiple facets:
-• **Core Principle:** It operates on cause-and-effect mappings.
-• **Practical Application:** It is used globally to optimize processing.`;
-        }
-        return `I am acting as a general-purpose conversational engine. I am ready to answer your query.`;
+
+        // General fallback search in KHIT_COLLEGE_INFO
+        return `### Kallam Haranadhareddy Institute of Technology (KHIT)
+- **Established:** 2010
+- **Affiliation:** JNTU Kakinada (JNTUK)
+- **Accreditation:** NAAC 'A' Grade, AICTE approved, NBA aligned.
+- **Location:** Guntur-Chennai Highway, Dasaripalem, Guntur, AP, 522019.
+- **Contacts:** Phone +91-9885604528 / 0863-2119726 | Web: \`khitguntur.ac.in\`
+*(Note: Active AI engine connection is currently resolving Google Cloud restrictions. General query responses may be limited.)*`;
     }
 
     function parseMarkdownToHTML(text) {
