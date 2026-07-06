@@ -545,14 +545,10 @@ Student Supervision: A designated Faculty Advisor oversees student course regist
     function subscribeToCirculars() {
         const circCollection = collection(db, "circulars");
         onSnapshot(circCollection, (snapshot) => {
-            if (snapshot.empty) {
-                prepopulateFirestore(circCollection);
-            } else {
-                const logs = [];
-                snapshot.forEach(doc => logs.push(doc.data()));
-                logs.sort((a,b) => b.timestamp - a.timestamp);
-                renderCircularLogs(logs);
-            }
+            const logs = [];
+            snapshot.forEach(doc => logs.push(doc.data()));
+            logs.sort((a,b) => b.timestamp - a.timestamp);
+            renderCircularLogs(logs);
         }, (error) => {
             console.error("Firestore sync error:", error);
             loadSimulatedCirculars(); 
