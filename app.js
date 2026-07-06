@@ -1707,6 +1707,7 @@ function solve(input) {
         
         const fileExt = file.name.split(".").pop().toLowerCase();
         const isImage = ["jpg", "jpeg", "png"].includes(fileExt);
+        const isPdf = fileExt === "pdf";
         
         let requestBody = {};
         
@@ -1722,10 +1723,10 @@ Return a valid JSON object matching this exact schema:
 }
 Ensure the output is ONLY a valid JSON object, without any markdown code blocks, backticks, or other formatting text. Just raw JSON.`;
 
-        if (isImage) {
+        if (isImage || isPdf) {
             const base64DataUrl = await readFileAsBase64(file);
             const base64Content = base64DataUrl.split(",")[1];
-            const mimeType = base64DataUrl.split(";")[0].split(":")[1];
+            const mimeType = isPdf ? "application/pdf" : base64DataUrl.split(";")[0].split(":")[1];
             
             requestBody = {
                 contents: [{
