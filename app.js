@@ -161,6 +161,17 @@ document.addEventListener("DOMContentLoaded", () => {
     let adminBulletinsList;
     try { adminBulletinsList = document.getElementById("admin-bulletins-list"); } catch (e) { console.warn("Selector error 'admin-bulletins-list':", e); }
 
+    // Calendar Workspace Elements
+    let btnCalendarToggle, calendarWorkspace, btnPrevMonth, btnNextMonth, calendarMonthYear, calendarDaysGrid, calendarInspectorDate, calendarInspectorList;
+    try { btnCalendarToggle = document.getElementById("btn-calendar-toggle"); } catch(e) {}
+    try { calendarWorkspace = document.getElementById("calendar-workspace"); } catch(e) {}
+    try { btnPrevMonth = document.getElementById("btn-prev-month"); } catch(e) {}
+    try { btnNextMonth = document.getElementById("btn-next-month"); } catch(e) {}
+    try { calendarMonthYear = document.getElementById("calendar-month-year"); } catch(e) {}
+    try { calendarDaysGrid = document.getElementById("calendar-days-grid"); } catch(e) {}
+    try { calendarInspectorDate = document.getElementById("calendar-inspector-date"); } catch(e) {}
+    try { calendarInspectorList = document.getElementById("calendar-inspector-list"); } catch(e) {}
+
     // Voice Mode Overlay Elements
     let btnVoiceMode;
     try { btnVoiceMode = document.getElementById("btn-voice-mode"); } catch (e) { console.warn("Selector error 'btn-voice-mode':", e); }
@@ -542,16 +553,22 @@ Student Supervision: A designated Faculty Advisor oversees student course regist
     }
 
     // --- Circular Data Streaming ---
+    let activeCircularsList = []; // Track active circulars in memory for calendar queries
+
     function subscribeToCirculars() {
         const circCollection = collection(db, "circulars");
         onSnapshot(circCollection, (snapshot) => {
             const logs = [];
             snapshot.forEach(doc => logs.push(doc.data()));
             logs.sort((a,b) => b.timestamp - a.timestamp);
+            activeCircularsList = logs;
             renderCircularLogs(logs);
+            renderInteractiveCalendar(); // Rebuild calendar dots
         }, (error) => {
             console.error("Firestore sync error:", error);
+            activeCircularsList = defaultCirculars;
             loadSimulatedCirculars(); 
+            renderInteractiveCalendar();
         });
     }
 
@@ -1516,20 +1533,55 @@ function solve(input) {
         });
     }
 
+    // --- Workspace Toggling Control Panel ---
+    function switchWorkspace(target) {
+        // Reset active highlights on header toggle buttons
+        if (btnCalendarToggle) btnCalendarToggle.classList.remove("framer-pill-active");
+        if (btnAdminToggle) btnAdminToggle.classList.remove("framer-pill-active");
+        
+        // Hide all workspace wrappers
+        if (chatWorkspace) chatWorkspace.classList.add("hidden");
+        if (calendarWorkspace) calendarWorkspace.classList.add("hidden");
+        if (adminWorkspace) adminWorkspace.classList.add("hidden");
+
+        if (target === "chat") {
+            if (chatWorkspace) chatWorkspace.classList.remove("hidden");
+            if (btnClearChat) btnClearChat.classList.remove("hidden");
+        } else if (target === "calendar") {
+            if (calendarWorkspace) calendarWorkspace.classList.remove("hidden");
+            if (btnCalendarToggle) btnCalendarToggle.classList.add("framer-pill-active");
+            if (btnClearChat) btnClearChat.classList.add("hidden");
+            renderInteractiveCalendar(); // Draw calendar
+        } else if (target === "admin") {
+            if (adminWorkspace) adminWorkspace.classList.remove("hidden");
+            if (btnAdminToggle) btnAdminToggle.classList.add("framer-pill-active");
+            if (btnClearChat) btnClearChat.classList.add("hidden");
+        }
+    }
+
+    if (btnCalendarToggle) {
+        btnCalendarToggle.addEventListener("click", () => {
+            switchWorkspace("calendar");
+        });
+    }
+
+    // Logo click triggers return to chat
+    const headerTitleElement = document.querySelector("header h2");
+    if (headerTitleElement) {
+        headerTitleElement.style.cursor = "pointer";
+        headerTitleElement.addEventListener("click", () => {
+            switchWorkspace("chat");
+        });
+    }
+
     // --- Admin Panel Handlers ---
     if (btnAdminToggle && chatWorkspace && adminWorkspace) {
         btnAdminToggle.addEventListener("click", () => {
             const isAdminHidden = adminWorkspace.classList.contains("hidden");
             if (isAdminHidden) {
-                chatWorkspace.classList.add("hidden");
-                adminWorkspace.classList.remove("hidden");
-                btnAdminToggle.textContent = "Go to Chat";
-                if (btnClearChat) btnClearChat.classList.add("hidden");
+                switchWorkspace("admin");
             } else {
-                adminWorkspace.classList.add("hidden");
-                chatWorkspace.classList.remove("hidden");
-                btnAdminToggle.textContent = "Admin Console";
-                if (btnClearChat) btnClearChat.classList.remove("hidden");
+                switchWorkspace("chat");
             }
         });
     }
@@ -1824,7 +1876,160 @@ Ensure the output is ONLY a valid JSON object, without any markdown code blocks,
 
         if (adminWorkspace) adminWorkspace.classList.add("hidden");
         if (chatWorkspace) chatWorkspace.classList.remove("hidden");
-        if (btnAdminToggle) btnAdminToggle.textContent = "Admin Console";
         resetAdminForm();
+    }
+
+    // --- INTERACTIVE CALENDAR CORE LOGIC ---
+    let calDate = new Date();
+    let currentMonth = calDate.getMonth();
+    let currentYear = calDate.getFullYear();
+
+    const monthNames = [
+        "January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"
+    ];
+
+    function getEventsForDate(day, month, year) {
+        return activeCircularsList.filter(log => {
+            try {
+                const eventDate = new Date(log.date || log.timestamp);
+                return eventDate.getDate() === day &&
+                       eventDate.getMonth() === month &&
+                       eventDate.getFullYear() === year;
+            } catch (e) {
+                return false;
+            }
+        });
+    }
+
+    function renderInteractiveCalendar() {
+        if (!calendarDaysGrid || !calendarMonthYear) return;
+
+        // Set Month/Year header title
+        calendarMonthYear.textContent = `${monthNames[currentMonth]} ${currentYear}`;
+
+        // Clear grid cells
+        calendarDaysGrid.innerHTML = "";
+
+        // First day of active month (0 = Sunday, 1 = Monday, etc.)
+        const firstDayIdx = new Date(currentYear, currentMonth, 1).getDay();
+
+        // Total days in active month
+        const totalDays = new Date(currentYear, currentMonth + 1, 0).getDate();
+
+        // 1. Add empty padding cells for leading days
+        for (let i = 0; i < firstDayIdx; i++) {
+            const emptyCell = document.createElement("div");
+            emptyCell.className = "calendar-day-cell calendar-day-empty";
+            calendarDaysGrid.appendChild(emptyCell);
+        }
+
+        const today = new Date();
+
+        // 2. Add calendar date cells
+        for (let day = 1; day <= totalDays; day++) {
+            const cell = document.createElement("div");
+            cell.className = "calendar-day-cell";
+            
+            // Check if day is today
+            if (day === today.getDate() && currentMonth === today.getMonth() && currentYear === today.getFullYear()) {
+                cell.classList.add("calendar-today-cell");
+            }
+
+            // Ingress date indicator label
+            const numLabel = document.createElement("span");
+            numLabel.className = "text-xs font-bold text-slate-400";
+            numLabel.textContent = day;
+            cell.appendChild(numLabel);
+
+            // Fetch any circular events matching this date
+            const dayEvents = getEventsForDate(day, currentMonth, currentYear);
+            
+            if (dayEvents.length > 0) {
+                // Add glowing event indicator dot
+                const dotContainer = document.createElement("div");
+                dotContainer.className = "flex justify-end w-full";
+                const dot = document.createElement("span");
+                dot.className = "calendar-event-dot";
+                dotContainer.appendChild(dot);
+                cell.appendChild(dotContainer);
+                
+                cell.title = `${dayEvents.length} notice(s)`;
+            }
+
+            // Click listener to inspect events in the right-side details panel
+            cell.addEventListener("click", () => {
+                // Remove previous selected border highlight
+                document.querySelectorAll(".calendar-day-cell").forEach(c => c.classList.remove("calendar-selected-cell"));
+                cell.classList.add("calendar-selected-cell");
+                inspectCalendarDate(day, currentMonth, currentYear, dayEvents);
+            });
+
+            calendarDaysGrid.appendChild(cell);
+        }
+    }
+
+    function inspectCalendarDate(day, month, year, events) {
+        if (!calendarInspectorDate || !calendarInspectorList) return;
+
+        calendarInspectorDate.textContent = `${monthNames[month]} ${day}, ${year}`;
+        calendarInspectorList.innerHTML = "";
+
+        if (events.length === 0) {
+            calendarInspectorList.innerHTML = `
+                <div class="text-slate-500 text-xs italic text-center py-8">
+                    No academic notices or circulars scheduled on this day.
+                </div>
+            `;
+        } else {
+            events.forEach(event => {
+                const card = document.createElement("div");
+                card.className = "p-4.5 rounded-2xl border border-slate-800/80 bg-slate-950/40 relative space-y-2 hover:border-[#38bdf8]/40 transition duration-200";
+                card.innerHTML = `
+                    <div class="flex justify-between items-start gap-2">
+                        <span class="text-[9px] uppercase font-bold tracking-wider px-2 py-0.5 rounded ${event.urgent ? 'text-rose-400 bg-rose-500/10 border border-rose-500/20' : 'text-[#38bdf8] bg-sky-500/10 border border-sky-500/20'}">
+                            ${event.category}
+                        </span>
+                    </div>
+                    <h4 class="text-xs font-bold text-white uppercase tracking-tight">${event.title}</h4>
+                    <p class="text-[10px] text-slate-400 leading-relaxed line-clamp-3">${event.summary}</p>
+                    <button class="text-[9px] text-[#38bdf8] hover:underline font-bold mt-1 block uppercase tracking-wide cursor-pointer" data-action="read">
+                        Read Notice →
+                    </button>
+                `;
+                
+                // Read Notice triggers chat query about this specific notice
+                card.querySelector('button[data-action="read"]').addEventListener("click", () => {
+                    // Switch to Chat tab
+                    switchWorkspace("chat");
+                    // Submit query about the circular
+                    submitAcademicQuery(`Details on ${event.title}`);
+                });
+
+                calendarInspectorList.appendChild(card);
+            });
+        }
+    }
+
+    if (btnPrevMonth) {
+        btnPrevMonth.addEventListener("click", () => {
+            currentMonth--;
+            if (currentMonth < 0) {
+                currentMonth = 11;
+                currentYear--;
+            }
+            renderInteractiveCalendar();
+        });
+    }
+
+    if (btnNextMonth) {
+        btnNextMonth.addEventListener("click", () => {
+            currentMonth++;
+            if (currentMonth > 11) {
+                currentMonth = 0;
+                currentYear++;
+            }
+            renderInteractiveCalendar();
+        });
     }
 });

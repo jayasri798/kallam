@@ -128,6 +128,10 @@
                     <button id="btn-clear-chat" class="text-[10px] framer-pill-button font-pixel py-2 px-4 cursor-pointer uppercase">
                         Clear Chat
                     </button>
+                    <!-- Calendar View Toggle Button -->
+                    <button id="btn-calendar-toggle" class="text-[10px] framer-pill-button font-pixel py-2 px-4 cursor-pointer uppercase">
+                        Calendar View
+                    </button>
                     <!-- Admin Console Toggle Button (Completely hidden by default) -->
                     <button id="btn-admin-toggle" class="hidden text-[10px] framer-pill-button framer-pill-active font-pixel py-2 px-4 cursor-pointer uppercase">
                         Admin Console
@@ -236,6 +240,60 @@
                         </div>
                     </div>
                 </footer>
+            </div>
+
+            <!-- Calendar Workspace Wrapper (Hidden by default) -->
+            <div id="calendar-workspace" class="flex-1 flex flex-col md:flex-row overflow-y-auto p-6 md:p-10 hidden gap-8 pb-16">
+                <!-- Left Column: Interactive Calendar Grid -->
+                <div class="flex-1 framer-neon-card p-6.5 space-y-6 relative h-fit">
+                    <div class="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#38bdf8] to-transparent"></div>
+                    
+                    <!-- Month Header Controls -->
+                    <div class="flex items-center justify-between">
+                        <button id="btn-prev-month" class="framer-pill-button px-4 py-2 text-xs font-bold cursor-pointer uppercase">
+                            ← Prev
+                        </button>
+                        <h3 id="calendar-month-year" class="text-md font-pixel text-white uppercase tracking-wider text-center">
+                            July 2026
+                        </h3>
+                        <button id="btn-next-month" class="framer-pill-button px-4 py-2 text-xs font-bold cursor-pointer uppercase">
+                            Next →
+                        </button>
+                    </div>
+
+                    <!-- Days of Week Headers -->
+                    <div class="grid grid-cols-7 text-center text-[10px] font-pixel text-slate-500 uppercase tracking-wider pb-2 border-b border-slate-800/60">
+                        <div>Sun</div>
+                        <div>Mon</div>
+                        <div>Tue</div>
+                        <div>Wed</div>
+                        <div>Thu</div>
+                        <div>Fri</div>
+                        <div>Sat</div>
+                    </div>
+
+                    <!-- Dynamic Calendar Grid Cells -->
+                    <div id="calendar-days-grid" class="calendar-grid">
+                        <!-- Cells are injected dynamically by app.js -->
+                    </div>
+                </div>
+
+                <!-- Right Column: Selected Date Event Inspector -->
+                <div class="w-full md:w-80 framer-neon-card p-6.5 space-y-6 relative h-fit min-h-[350px]">
+                    <div class="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#38bdf8] to-transparent"></div>
+                    
+                    <div class="space-y-1">
+                        <h3 class="text-xs font-pixel text-slate-400 uppercase tracking-wider">Scheduled Events</h3>
+                        <p id="calendar-inspector-date" class="text-sm font-bold text-white">Select a date cell to view bulletins</p>
+                    </div>
+
+                    <div id="calendar-inspector-list" class="space-y-4 overflow-y-auto max-h-[400px]">
+                        <!-- Selected day events will render here -->
+                        <div class="text-slate-500 text-xs italic text-center py-8">
+                            Click any highlighted date cell containing an event.
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Admin Workspace Section (Completely hidden by default) -->
