@@ -219,6 +219,20 @@ document.addEventListener("DOMContentLoaded", () => {
         return `<user_query>${sanitized}</user_query>`;
     }
 
+    async function saveChatHistoryToFirestore() {
+        if (db && currentUserDetails && currentUserDetails.uid) {
+            try {
+                const userDocRef = doc(db, "users", currentUserDetails.uid);
+                await setDoc(userDocRef, {
+                    chatHistory: chatHistory
+                }, { merge: true });
+                console.log("Chat history synchronised with Firestore cloud repository.");
+            } catch (e) {
+                console.error("Failed to save chat history to Firestore:", e);
+            }
+        }
+    }
+
     // Default Academic Data for Firestore Pre-population and Fallback Registry
     const defaultCirculars = [
         {
@@ -360,6 +374,7 @@ Student Supervision: A designated Faculty Advisor oversees student course regist
             };
 
             let role = "student";
+            let savedHistory = [];
             try {
                 console.log("Firestore Sync Init");
                 // Update user record in Firestore
@@ -368,6 +383,7 @@ Student Supervision: A designated Faculty Advisor oversees student course regist
                 if (userSnap.exists()) {
                     const userData = userSnap.data();
                     role = userData.accountRole || "student";
+                    savedHistory = userData.chatHistory || [];
                 }
                 
                 await setDoc(userDocRef, {
@@ -384,10 +400,33 @@ Student Supervision: A designated Faculty Advisor oversees student course regist
             }
 
             currentUserDetails.accountRole = role;
+            chatHistory = savedHistory; // Restore conversational memory state
 
             setupUserUI(currentUserDetails);
             showDashboard();
             subscribeToCirculars();
+
+            // Load and render previous chat logs if they exist
+            if (chatHistory && chatHistory.length > 0) {
+                if (welcomeView) welcomeView.classList.add("hidden");
+                if (chatWindow) {
+                    chatWindow.innerHTML = "";
+                    chatWindow.classList.remove("hidden");
+                    
+                    chatHistory.forEach(turn => {
+                        const roleType = turn.role === "user" ? "user" : "model";
+                        let textContent = turn.parts?.[0]?.text || "";
+                        
+                        // Strip out XML guardrail tags for clean display
+                        if (roleType === "user") {
+                            textContent = textContent.replace(/<user_query>/g, "").replace(/<\/user_query>/g, "");
+                            textContent = textContent.replace(/&lt;/g, "<").replace(/&gt;/g, ">");
+                        }
+                        
+                        appendBubble(roleType, textContent);
+                    });
+                }
+            }
         } else {
             hideDashboard();
         }
@@ -776,6 +815,7 @@ ${circularsContext}`;
             role: "user",
             parts: [{ text: guardedInput }]
         });
+        saveChatHistoryToFirestore();
         
         await callGeminiAPI(
             systemInstruction,
@@ -787,6 +827,7 @@ ${circularsContext}`;
                     role: "model",
                     parts: [{ text: responseText }]
                 });
+                saveChatHistoryToFirestore();
                 appendStreamingBubble(responseText, () => {
                     setLogoProcessing(false);
                     if (voiceModeOverlayActive) {
@@ -801,6 +842,7 @@ ${circularsContext}`;
                     role: "model",
                     parts: [{ text: fallbackText }]
                 });
+                saveChatHistoryToFirestore();
                 appendStreamingBubble(fallbackText, () => {
                     setLogoProcessing(false);
                     if (voiceModeOverlayActive) {
@@ -1594,6 +1636,7 @@ function solve(input) {
             
             // Reset Conversational Memory State
             chatHistory = [];
+            saveChatHistoryToFirestore();
             console.log("%c[KHIT-Pulse Memory State] Conversational history reset.", 'color: #38bdf8;');
             
             if (chatWindow) {
