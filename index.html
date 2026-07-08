@@ -12,7 +12,7 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <!-- Custom Style Sheet -->
-    <link rel="stylesheet" href="styles.css?v=2.0.3">
+    <link rel="stylesheet" href="styles.css?v=2.0.4">
 </head>
 <body class="bg-[#020203] text-slate-200 min-h-screen font-grotesk antialiased relative overflow-hidden">
     
@@ -482,6 +482,11 @@
             
             <!-- Voice Mode Action Buttons -->
             <div class="flex items-center gap-4">
+                <!-- Engine Toggle Dropdown -->
+                <select id="sel-voice-engine" class="framer-pill-button bg-slate-950 border border-white/10 text-xs px-4 py-2.5 rounded-full cursor-pointer focus:outline-none focus:border-[#8b5cf6] font-pixel uppercase">
+                    <option value="live">Gemini Live (Real-Time)</option>
+                    <option value="talkback">Talkback Mode (Default)</option>
+                </select>
                 <!-- Language Toggle Dropdown -->
                 <select id="sel-voice-lang" class="framer-pill-button bg-slate-950 border border-white/10 text-xs px-4 py-2.5 rounded-full cursor-pointer focus:outline-none focus:border-[#8b5cf6] font-pixel uppercase">
                     <option value="en-IN">English (India)</option>
@@ -506,6 +511,6 @@
     </div>
 
     <!-- Application Script -->
-    <script type="module" src="app.js?v=2.0.3"></script>
+    <script type="module" src="app.js?v=2.0.4"></script>
 </body>
 </html>
