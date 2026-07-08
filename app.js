@@ -945,13 +945,20 @@ ${circularsContext}`;
                     parts: [{ text: responseText }]
                 });
                 saveChatHistoryToFirestore();
+                
+                // Start speaking immediately without waiting for typing animation to complete
+                if (voiceModeOverlayActive) {
+                    const hasTelugu = /[\u0c00-\u0c7f]/.test(responseText);
+                    const selectedLang = hasTelugu ? "te-IN" : "en-IN";
+                    
+                    const langSelector = document.getElementById("sel-voice-lang");
+                    if (langSelector) langSelector.value = selectedLang;
+                    
+                    playGoogleTranslateTTS(responseText, selectedLang);
+                }
+                
                 appendStreamingBubble(responseText, () => {
                     setLogoProcessing(false);
-                    if (voiceModeOverlayActive) {
-                        const langSelector = document.getElementById("sel-voice-lang");
-                        const selectedLang = langSelector ? langSelector.value : "en-IN";
-                        playGoogleTranslateTTS(responseText, selectedLang);
-                    }
                 });
             },
             (err) => {
@@ -962,13 +969,19 @@ ${circularsContext}`;
                     parts: [{ text: fallbackText }]
                 });
                 saveChatHistoryToFirestore();
+                
+                if (voiceModeOverlayActive) {
+                    const hasTelugu = /[\u0c00-\u0c7f]/.test(fallbackText);
+                    const selectedLang = hasTelugu ? "te-IN" : "en-IN";
+                    
+                    const langSelector = document.getElementById("sel-voice-lang");
+                    if (langSelector) langSelector.value = selectedLang;
+                    
+                    playGoogleTranslateTTS(fallbackText, selectedLang);
+                }
+                
                 appendStreamingBubble(fallbackText, () => {
                     setLogoProcessing(false);
-                    if (voiceModeOverlayActive) {
-                        const langSelector = document.getElementById("sel-voice-lang");
-                        const selectedLang = langSelector ? langSelector.value : "en-IN";
-                        playGoogleTranslateTTS(fallbackText, selectedLang);
-                    }
                 });
             }
         );
@@ -1370,16 +1383,23 @@ function solve(input) {
 
 
     function setMicState(state) {
+        if (voiceOverlay) {
+            voiceOverlay.classList.remove("voice-listening", "voice-speaking", "voice-muted");
+        }
         if (voiceWaveVisualizer) {
             voiceWaveVisualizer.classList.remove("voice-listening", "voice-speaking", "voice-muted");
             if (voiceMicMuted) {
                 voiceWaveVisualizer.classList.add("voice-muted");
+                if (voiceOverlay) voiceOverlay.classList.add("voice-muted");
             } else if (state === 'listening') {
                 voiceWaveVisualizer.classList.add("voice-listening");
+                if (voiceOverlay) voiceOverlay.classList.add("voice-listening");
             } else if (state === 'speaking') {
                 voiceWaveVisualizer.classList.add("voice-speaking");
+                if (voiceOverlay) voiceOverlay.classList.add("voice-speaking");
             } else {
                 voiceWaveVisualizer.classList.add("voice-speaking"); // pulse state
+                if (voiceOverlay) voiceOverlay.classList.add("voice-speaking");
             }
         }
 

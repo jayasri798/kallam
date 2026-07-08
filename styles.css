@@ -751,6 +751,39 @@ html, body {
     transform: scale(0.95) !important;
 }
 
+/* --- STATE REACTIVE VOICE BACKLIGHTS --- */
+.voice-listening .blob-purple {
+    background: radial-gradient(circle, #22c55e, #15803d) !important;
+    opacity: 0.15 !important;
+}
+.voice-listening .blob-cyan {
+    background: radial-gradient(circle, #4ade80, #166534) !important;
+    opacity: 0.15 !important;
+}
+.voice-listening .blob-pink {
+    background: radial-gradient(circle, #15803d, #14532d) !important;
+    opacity: 0.10 !important;
+}
+
+.voice-speaking .blob-purple {
+    background: radial-gradient(circle, var(--accent-purple), var(--accent-magenta)) !important;
+    opacity: 0.18 !important;
+}
+.voice-speaking .blob-cyan {
+    background: radial-gradient(circle, var(--accent-cyan), #3b82f6) !important;
+    opacity: 0.18 !important;
+}
+.voice-speaking .blob-pink {
+    background: radial-gradient(circle, var(--accent-magenta), var(--accent-purple)) !important;
+    opacity: 0.12 !important;
+}
+
+.voice-muted .ambient-blob {
+    background: radial-gradient(circle, #475569, #1e293b) !important;
+    opacity: 0.05 !important;
+}
+
+
 
 
 
