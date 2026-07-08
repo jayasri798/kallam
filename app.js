@@ -36,7 +36,7 @@ const firebaseConfig = {
 };
 
 // Dedicated Gemini API Key (Loaded dynamically from Firestore to avoid hardcoded secrets in Git)
-let geminiApiKey = "";
+let geminiApiKey = "AQ.Ab8RN6JLN-o72ruXAZ6fKtjeqsSATh-FvOTvSUR7T_-JMu1Xw";
 
 // --- DOM Event Bindings ---
 function initializeApplication() {
@@ -451,8 +451,11 @@ Student Supervision: A designated Faculty Advisor oversees student course regist
                 const configDocRef = doc(db, "config", "gemini");
                 const configSnap = await getDoc(configDocRef);
                 if (configSnap.exists()) {
-                    geminiApiKey = configSnap.data().apiKey || "";
-                    console.log("Gemini API key loaded dynamically from secure config.");
+                    const dbKey = configSnap.data().apiKey;
+                    if (dbKey) {
+                        geminiApiKey = dbKey;
+                        console.log("Gemini API key loaded dynamically from secure config.");
+                    }
                 }
             } catch (configErr) {
                 console.warn("Secure config loading skipped or failed:", configErr);
@@ -538,8 +541,11 @@ Student Supervision: A designated Faculty Advisor oversees student course regist
                 const configDocRef = doc(db, "config", "gemini");
                 getDoc(configDocRef).then(configSnap => {
                     if (configSnap.exists()) {
-                        geminiApiKey = configSnap.data().apiKey || "";
-                        console.log("Gemini API key loaded dynamically in guest mode.");
+                        const dbKey = configSnap.data().apiKey;
+                        if (dbKey) {
+                            geminiApiKey = dbKey;
+                            console.log("Gemini API key loaded dynamically in guest mode.");
+                        }
                     }
                 }).catch(configErr => {
                     console.warn("Dynamic key loading skipped in guest mode:", configErr);
