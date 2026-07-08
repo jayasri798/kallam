@@ -1043,7 +1043,7 @@ ${circularsContext}`;
 
         if (voiceModeOverlayActive) {
             requestPayload.generationConfig.responseModalities = ["TEXT", "AUDIO"];
-            requestPayload.generationConfig.speechConfig = {
+            requestPayload.speechConfig = {
                 voiceConfig: {
                     prebuiltVoiceConfig: {
                         voiceName: "Aoede" // Premium cute, sweet female voice
