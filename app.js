@@ -301,6 +301,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const KHIT_COLLEGE_INFO = `
 [COLLEGE IDENTITY]
 College Full Name: Kallam Haranadhareddy Institute of Technology (KHIT)
+Principal: Dr. B. S. B. Reddy
 Establishment Year: 2010
 Affiliation: Affiliated to JNTU Kakinada (JNTUK)
 Accreditation: NAAC Accredited with 'A' Grade, AICTE approved, NBA aligned.
@@ -1054,6 +1055,14 @@ ${circularsContext}`;
     function fallbackLocalModel(queryStr) {
         const q = queryStr.toLowerCase();
         
+        // 0. Principal / Administration Queries
+        if (q.includes("principal") || q.includes("director") || q.includes("head") || q.includes("principle")) {
+            return `### KHIT Administration (Local Answering Engine)
+- **Principal:** Dr. B. S. B. Reddy
+- **Status:** Head of Institution
+- **Office Location:** Main Block, Ground Floor`;
+        }
+        
         // 1. Placement / Salary Queries
         if (q.includes("placement") || q.includes("salary") || q.includes("package") || q.includes("lpa") || q.includes("jobs") || q.includes("hiring")) {
             return `### KHIT Placement & Recruitment Records (Local Answering Engine)
@@ -1122,6 +1131,7 @@ function solve(input) {
 
         // General fallback search in KHIT_COLLEGE_INFO
         return `### Kallam Haranadhareddy Institute of Technology (KHIT)
+- **Principal:** Dr. B. S. B. Reddy
 - **Established:** 2010
 - **Affiliation:** JNTU Kakinada (JNTUK)
 - **Accreditation:** NAAC 'A' Grade, AICTE approved, NBA aligned.
