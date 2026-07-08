@@ -1218,7 +1218,7 @@ function solve(input) {
 - **Affiliation:** JNTU Kakinada (JNTUK)
 - **Accreditation:** NAAC 'A' Grade, AICTE approved, NBA aligned.
 - **Location:** Guntur-Chennai Highway, Dasaripalem, Guntur, AP, 522019.
-- **Contacts:** Phone +91-9885604528 / 0863-2119726 | Web: `khitguntur.ac.in`
+- **Contacts:** Phone +91-9885604528 / 0863-2119726 | Web: \`khitguntur.ac.in\`
 *(Note: Live Campus Database is active. Ask me about college admissions, seat placements, or syllabus circulars!)*`;
     }
 
