@@ -924,8 +924,16 @@ ${circularsContext}`;
         });
         saveChatHistoryToFirestore();
         
+        let activeSystemInstruction = systemInstruction;
+        if (voiceModeOverlayActive) {
+            const langSelector = document.getElementById("sel-voice-lang");
+            if (langSelector && langSelector.value === "te-IN") {
+                activeSystemInstruction += `\n\n5. LANGUAGE REQUIREMENT: You MUST answer the user's query in TELUGU language only. Translate all explanations, college statistics, admissions metadata, and circular details into natural, clear Telugu text. Do not use English letters; respond purely in Telugu text so it can be synthesized correctly.`;
+            }
+        }
+        
         await callGeminiAPI(
-            systemInstruction,
+            activeSystemInstruction,
             chatHistory,
             (responseText) => {
                 removeTypingIndicator(indicator);
@@ -1388,92 +1396,28 @@ function solve(input) {
 
     function startPassiveWakeListener() {
         if (!voiceModeOverlayActive) return;
-        if (!SpeechRecognition) {
-            console.warn("KHIT-Pulse: Speech recognition not supported by browser.");
-            setMicState('off');
+        if (voiceMicMuted) {
+            setMicState('muted');
             return;
         }
-
-        window.speechSynthesis.cancel();
-        
-        if (activeRecognition) {
-            try { activeRecognition.stop(); } catch(e) {}
-        }
-
-        isWakeWordActive = true;
-        setMicState('idle');
-        capturedSpeechText = "";
-
-        if (!passiveRecognition) {
-            passiveRecognition = new SpeechRecognition();
-            passiveRecognition.continuous = true;
-            passiveRecognition.interimResults = false;
-            passiveRecognition.lang = "en-IN";
-
-            passiveRecognition.onresult = (event) => {
-                const lastResultIndex = event.resultIndex;
-                const transcript = event.results[lastResultIndex][0].transcript.trim().toLowerCase();
-                console.log("KHIT-Pulse passive voice capture:", transcript);
-
-                if (transcript.includes("khit") || transcript.includes("pulse") || transcript.includes("kit") || transcript.includes("kallam")) {
-                    console.log("Wake word 'KHIT' detected! Triggering active capture...");
-                    triggerWakeActivation();
-                }
-            };
-
-            passiveRecognition.onerror = (event) => {
-                console.warn("KHIT-Pulse passive engine error:", event.error);
-                if (event.error === 'not-allowed') {
-                    isWakeWordActive = false;
-                    setMicState('off');
-                }
-            };
-
-            passiveRecognition.onend = () => {
-                if (isWakeWordActive) {
-                    try {
-                        passiveRecognition.start();
-                    } catch(e) {}
-                }
-            };
-        }
-
-        try {
-            passiveRecognition.start();
-        } catch (e) {}
+        startActiveQueryCapture();
     }
 
     function stopPassiveWakeListener() {
-        isWakeWordActive = false;
-        if (passiveRecognition) {
-            try {
-                passiveRecognition.stop();
-            } catch(e) {}
-        }
+        stopActiveQueryCapture();
     }
 
     function triggerWakeActivation() {
         if (!voiceModeOverlayActive) return;
-        stopPassiveWakeListener();
-        
-        try {
-            document.querySelectorAll(".khit-logo-container").forEach(el => {
-                el.classList.add("logo-wake-active");
-            });
-        } catch (e) {
-            console.warn(e);
-        }
-        
-        playSynthesizedChime();
-        
-        setTimeout(() => {
-            startActiveQueryCapture();
-        }, 250);
+        startActiveQueryCapture();
     }
 
     function startActiveQueryCapture() {
         if (!voiceModeOverlayActive) return;
-        stopPassiveWakeListener();
+        if (voiceMicMuted) {
+            setMicState('muted');
+            return;
+        }
 
         if (!SpeechRecognition) {
             showToast("Speech recognition is not supported in this browser.");
@@ -1487,7 +1431,6 @@ function solve(input) {
             activeRecognition = new SpeechRecognition();
             activeRecognition.continuous = false;
             activeRecognition.interimResults = true;
-            activeRecognition.lang = "en-IN";
 
             activeRecognition.onstart = () => {
                 capturedSpeechText = "";
@@ -1522,8 +1465,11 @@ function solve(input) {
                     showToast("Microphone access denied.");
                 }
                 
-                // Re-open passive wake listener immediately on capture failure to keep standby active
-                startPassiveWakeListener();
+                if (voiceModeOverlayActive && !voiceMicMuted && event.error !== 'aborted') {
+                    setTimeout(() => {
+                        startActiveQueryCapture();
+                    }, 400);
+                }
             };
 
             activeRecognition.onend = () => {
@@ -1542,10 +1488,18 @@ function solve(input) {
                 if (finalQuery) {
                     submitAcademicQuery(finalQuery);
                 } else {
-                    startPassiveWakeListener();
+                    if (voiceModeOverlayActive && !voiceMicMuted) {
+                        setTimeout(() => {
+                            startActiveQueryCapture();
+                        }, 400);
+                    }
                 }
             };
         }
+
+        const langSelector = document.getElementById("sel-voice-lang");
+        const selectedLang = langSelector ? langSelector.value : "en-IN";
+        activeRecognition.lang = selectedLang;
 
         try {
             activeRecognition.start();
@@ -1566,16 +1520,23 @@ function solve(input) {
         const plainText = htmlText.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ');
         const utterance = new SpeechSynthesisUtterance(plainText);
         
-        // Increase speed slightly (1.15x) and raise pitch to 1.15 for a clear, cute voice tone
         utterance.rate = 1.15;
         utterance.pitch = 1.15;
         
-        utterance.lang = 'en-IN';
+        const langSelector = document.getElementById("sel-voice-lang");
+        const selectedLang = langSelector ? langSelector.value : "en-IN";
+        utterance.lang = selectedLang;
         
         const voices = window.speechSynthesis.getVoices();
         
-        // Prefer premium female voices (like Samantha on macOS/iOS, Google US English/Google UK English Female on Chrome, or Microsoft Zira on Windows)
-        let selectedVoice = voices.find(v => v.lang.includes('en-IN') && v.name.toLowerCase().includes('google'));
+        let selectedVoice;
+        if (selectedLang === "te-IN") {
+            selectedVoice = voices.find(v => v.lang.includes('te-IN') || v.lang.includes('te'));
+        }
+        
+        if (!selectedVoice) {
+            selectedVoice = voices.find(v => v.lang.includes('en-IN') && v.name.toLowerCase().includes('google'));
+        }
         if (!selectedVoice) {
             selectedVoice = voices.find(v => v.name.includes('Samantha') || v.name.includes('Google US English') || v.name.includes('Google UK English Female') || v.name.includes('Microsoft Zira'));
         }
@@ -1597,19 +1558,30 @@ function solve(input) {
             console.log("Selected voice for speech synthesis:", selectedVoice.name);
         }
         
+        utterance.onstart = () => {
+            setMicState('speaking');
+        };
+        
         utterance.onend = () => {
             console.log("KHIT-Pulse: Speech completed.");
             setLogoProcessing(false);
             
-            // Clear processing loading state and re-open passive background wake listener
-            startPassiveWakeListener();
+            if (voiceModeOverlayActive && !voiceMicMuted) {
+                setTimeout(() => {
+                    startActiveQueryCapture();
+                }, 500);
+            }
         };
 
         utterance.onerror = (e) => {
             console.error("KHIT-Pulse: Speech Synthesis Error", e);
             setLogoProcessing(false);
             
-            startPassiveWakeListener();
+            if (voiceModeOverlayActive && !voiceMicMuted) {
+                setTimeout(() => {
+                    startActiveQueryCapture();
+                }, 500);
+            }
         };
         
         window.speechSynthesis.speak(utterance);
@@ -1665,12 +1637,15 @@ function solve(input) {
             }
             
             if (voiceOverlayCaptions) {
-                voiceOverlayCaptions.textContent = 'Say "KHIT" to begin speaking...';
+                voiceOverlayCaptions.textContent = 'Opening audio channel...';
             }
             
+            window.speechSynthesis.cancel();
             stopActiveQueryCapture();
-            // Start the passive listener on standby
-            startPassiveWakeListener();
+            
+            setTimeout(() => {
+                startActiveQueryCapture();
+            }, 600);
         });
     }
 
@@ -1826,8 +1801,7 @@ function solve(input) {
                 stopActiveQueryCapture();
             } else {
                 btnVoiceMute.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Mute Mic`;
-                setMicState('idle');
-                startPassiveWakeListener();
+                startActiveQueryCapture();
             }
         });
     }
