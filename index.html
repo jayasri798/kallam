@@ -468,7 +468,10 @@
 
             <!-- Dynamic Typography live text captions field -->
             <div class="space-y-4 w-full">
-                <div class="text-[9px] font-pixel uppercase tracking-wider text-[#5aa2fa]">Voice Transmission</div>
+                <div class="flex items-center justify-between px-2 text-[9px] font-pixel uppercase tracking-wider">
+                    <span class="text-slate-400">Voice Transmission</span>
+                    <span id="voice-status-indicator" class="text-slate-500 font-bold transition duration-200 uppercase">Idle</span>
+                </div>
                 <div id="voice-overlay-captions" class="text-xl md:text-2xl font-semibold text-slate-350 leading-relaxed min-h-24 px-6 bg-slate-950/20 py-8 rounded-2xl border border-slate-900/40 backdrop-blur-sm shadow-inner font-grotesk">
                     Opening voice connection...
                 </div>

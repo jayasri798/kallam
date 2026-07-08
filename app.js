@@ -190,10 +190,11 @@ document.addEventListener("DOMContentLoaded", () => {
     try { profileBookmarksList = document.getElementById("profile-bookmarks-list"); } catch(e) {}
 
     // Advanced Voice Controls
-    let btnVoiceMute, btnVoiceExit, voiceWaveVisualizer;
+    let btnVoiceMute, btnVoiceExit, voiceWaveVisualizer, voiceStatusIndicator;
     try { btnVoiceMute = document.getElementById("btn-voice-mute"); } catch(e) {}
     try { btnVoiceExit = document.getElementById("btn-voice-exit"); } catch(e) {}
     try { voiceWaveVisualizer = document.getElementById("voice-wave-visualizer"); } catch(e) {}
+    try { voiceStatusIndicator = document.getElementById("voice-status-indicator"); } catch(e) {}
 
     // Voice Mode Overlay Elements
     let btnVoiceMode;
@@ -1403,21 +1404,30 @@ function solve(input) {
             }
         }
 
-        if (state === 'listening') {
-            if (voiceOverlayCaptions) {
-                voiceOverlayCaptions.textContent = "Listening... Start speaking.";
+        if (voiceStatusIndicator) {
+            voiceStatusIndicator.className = "font-bold transition duration-200 uppercase text-slate-500";
+            
+            if (voiceMicMuted || state === 'muted') {
+                voiceStatusIndicator.textContent = "Muted";
+                voiceStatusIndicator.classList.remove("text-slate-500");
+                voiceStatusIndicator.classList.add("text-rose-500");
+            } else if (state === 'listening') {
+                voiceStatusIndicator.textContent = "Listening";
+                voiceStatusIndicator.classList.remove("text-slate-500");
+                voiceStatusIndicator.classList.add("text-emerald-400");
+            } else if (state === 'speaking') {
+                voiceStatusIndicator.textContent = "Speaking";
+                voiceStatusIndicator.classList.remove("text-slate-500");
+                voiceStatusIndicator.classList.add("text-[#5aa2fa]");
+            } else {
+                voiceStatusIndicator.textContent = "Processing";
+                voiceStatusIndicator.classList.remove("text-slate-500");
+                voiceStatusIndicator.classList.add("text-purple-400");
             }
-        } else if (state === 'idle') {
-            if (voiceOverlayCaptions) {
-                voiceOverlayCaptions.textContent = 'Say "KHIT" to begin speaking...';
-            }
-            if (interimOverlay) interimOverlay.textContent = "";
-        } else if (state === 'muted') {
-            if (voiceOverlayCaptions) {
-                voiceOverlayCaptions.textContent = "Microphone muted.";
-            }
-        } else {
-            if (interimOverlay) interimOverlay.textContent = "";
+        }
+
+        if (state === 'idle' && interimOverlay) {
+            interimOverlay.textContent = "";
         }
     }
 
