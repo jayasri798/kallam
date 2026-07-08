@@ -1960,6 +1960,7 @@ Ensure the output is ONLY a valid JSON object, without any markdown code blocks,
             console.log("AI analysis successful. Ingesting structured data:", circularData);
         } catch (aiErr) {
             console.warn("AI circular analysis failed, falling back to default metadata:", aiErr);
+            showToast("Warning: AI analysis failed. Check Google Cloud restrictions.");
             if (file.name.endsWith(".txt")) {
                 try {
                     const txt = await readFileAsText(file);
