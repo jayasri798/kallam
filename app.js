@@ -2019,12 +2019,20 @@ function solve(input) {
             liveWebSocket.onerror = (err) => {
                 console.error("Gemini Live WebSocket Error:", err);
                 stopLiveWebSocket();
-                showToast("Failed to connect to Gemini Live. Falling back to Talkback...");
                 
-                const engineSelector = document.getElementById("sel-voice-engine");
-                if (engineSelector) engineSelector.value = "talkback";
+                if (voiceOverlayCaptions) {
+                    voiceOverlayCaptions.textContent = "Gemini Live Error. Make sure a valid Gemini API Key (starts with AIzaSy) is set in your database config.";
+                }
                 
-                startActiveQueryCapture();
+                showToast("Connection to Gemini Live failed. Falling back to Talkback...");
+                
+                setTimeout(() => {
+                    if (voiceModeOverlayActive) {
+                        const engineSelector = document.getElementById("sel-voice-engine");
+                        if (engineSelector) engineSelector.value = "talkback";
+                        startActiveQueryCapture();
+                    }
+                }, 3500);
             };
         } catch(e) {
             console.error("WebSocket setup exception:", e);
