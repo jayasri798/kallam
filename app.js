@@ -2920,6 +2920,50 @@ Ensure the output is ONLY a valid JSON object, without any markdown code blocks,
             renderInteractiveCalendar();
         });
     }
+
+    // Reconnect voice session if browser suspends tab in background (visibility change or pageshow)
+    document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "visible") {
+            console.log("Tab returned to foreground. Verifying active voice session status...");
+            if (voiceModeOverlayActive) {
+                if (micAudioContext && micAudioContext.state === 'suspended') {
+                    micAudioContext.resume().catch(e => console.warn(e));
+                }
+                if (liveAudioPlayer) {
+                    liveAudioPlayer.start();
+                }
+                const engineSelector = document.getElementById("sel-voice-engine");
+                const selectedEngine = engineSelector ? engineSelector.value : "live";
+                if (selectedEngine === "live") {
+                    if (!liveWebSocket || liveWebSocket.readyState !== WebSocket.OPEN) {
+                        console.log("Re-establishing background-suspended live websocket...");
+                        startLiveWebSocket();
+                    }
+                }
+            }
+        }
+    });
+
+    window.addEventListener("pageshow", (event) => {
+        if (event.persisted) {
+            console.log("Page restored from back-forward cache. Restarting voice contexts...");
+            if (voiceModeOverlayActive) {
+                if (micAudioContext && micAudioContext.state === 'suspended') {
+                    micAudioContext.resume().catch(e => console.warn(e));
+                }
+                if (liveAudioPlayer) {
+                    liveAudioPlayer.start();
+                }
+                const engineSelector = document.getElementById("sel-voice-engine");
+                const selectedEngine = engineSelector ? engineSelector.value : "live";
+                if (selectedEngine === "live") {
+                    if (!liveWebSocket || liveWebSocket.readyState !== WebSocket.OPEN) {
+                        startLiveWebSocket();
+                    }
+                }
+            }
+        }
+    });
 }
 
 if (document.readyState === "loading") {
