@@ -132,6 +132,10 @@
                     <button id="btn-calendar-toggle" class="text-[10px] framer-pill-button font-pixel py-2 px-4 cursor-pointer uppercase">
                         Calendar View
                     </button>
+                    <!-- Profile View Toggle Button -->
+                    <button id="btn-profile-toggle" class="text-[10px] framer-pill-button font-pixel py-2 px-4 cursor-pointer uppercase">
+                        Profile
+                    </button>
                     <!-- Admin Console Toggle Button (Completely hidden by default) -->
                     <button id="btn-admin-toggle" class="hidden text-[10px] framer-pill-button framer-pill-active font-pixel py-2 px-4 cursor-pointer uppercase">
                         Admin Console
@@ -296,6 +300,60 @@
                 </div>
             </div>
 
+            <!-- Profile Workspace Wrapper (Hidden by default) -->
+            <div id="profile-workspace" class="flex-1 flex flex-col md:flex-row overflow-y-auto p-6 md:p-10 hidden gap-8 pb-16 justify-center items-start">
+                <!-- Left Card: User Identity & Stats Dashboard -->
+                <div class="max-w-xl w-full framer-neon-card p-8 space-y-6 relative h-fit">
+                    <div class="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#38bdf8] to-transparent"></div>
+                    
+                    <!-- Identity Header -->
+                    <div class="flex flex-col items-center text-center space-y-4">
+                        <img id="profile-avatar" src="" alt="User Avatar" class="w-24 h-24 rounded-full border-2 border-[#38bdf8]/40 shadow-lg object-cover">
+                        <div class="space-y-1">
+                            <h2 id="profile-name" class="text-xl font-bold text-white uppercase tracking-tight">Academic Guest</h2>
+                            <p id="profile-email" class="text-xs text-slate-400 font-medium">guest@khit.edu.in</p>
+                        </div>
+                        <span id="profile-role-badge" class="text-[10px] uppercase font-bold tracking-wider px-3.5 py-1 rounded-full text-[#38bdf8] bg-sky-500/10 border border-sky-500/20">
+                            Student
+                        </span>
+                    </div>
+
+                    <hr class="border-slate-800/60 my-6">
+
+                    <!-- Statistics Dashboard -->
+                    <div class="space-y-4">
+                        <h3 class="text-xs font-pixel text-slate-400 uppercase tracking-wider">User Session Statistics</h3>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="p-4 rounded-xl border border-slate-900 bg-slate-950/20 text-center">
+                                <div class="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Queries Sent</div>
+                                <div id="stat-query-count" class="text-2xl font-bold text-white mt-1">0</div>
+                            </div>
+                            <div class="p-4 rounded-xl border border-slate-900 bg-slate-950/20 text-center">
+                                <div class="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Last Sync</div>
+                                <div id="stat-last-active" class="text-xs font-bold text-slate-350 mt-2 truncate">Never</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Card: Bookmarked Notices / Quick Actions -->
+                <div class="w-full md:w-80 framer-neon-card p-8 space-y-6 relative h-fit min-h-[350px]">
+                    <div class="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#38bdf8] to-transparent"></div>
+                    
+                    <div class="space-y-1">
+                        <h3 class="text-xs font-pixel text-slate-400 uppercase tracking-wider">Saved Bulletins</h3>
+                        <p class="text-xs text-slate-500 leading-relaxed">Quickly reference notices you bookmarked during chat conversations.</p>
+                    </div>
+
+                    <div id="profile-bookmarks-list" class="space-y-4 overflow-y-auto max-h-[300px]">
+                        <!-- Bookmarks will render here -->
+                        <div class="text-slate-500 text-xs italic text-center py-12">
+                            Bookmarks are stored securely under your user profile.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Admin Workspace Section (Completely hidden by default) -->
             <div id="admin-workspace" class="flex-1 overflow-y-auto p-6 md:p-10 hidden flex flex-col items-center justify-start gap-8 pb-16">
                 <!-- Publish Bulletin Card -->
@@ -401,13 +459,19 @@
 
         <div class="flex flex-col items-center justify-center max-w-2xl w-full text-center space-y-12 px-6">
             <!-- Large focused floating logo orb -->
-            <div class="khit-logo-float-wrapper relative flex items-center justify-center">
-                <!-- Multi-ring ambient ripples -->
-                <div class="mic-active-ring"></div>
-                <div class="mic-active-ring"></div>
-                <div class="mic-active-ring"></div>
+            <div class="relative flex flex-col items-center justify-center space-y-6">
+                <!-- Soundwave dynamic visual equalizer bars -->
+                <div id="voice-wave-visualizer" class="voice-wave-container voice-speaking">
+                    <span class="voice-wave-bar"></span>
+                    <span class="voice-wave-bar"></span>
+                    <span class="voice-wave-bar"></span>
+                    <span class="voice-wave-bar"></span>
+                    <span class="voice-wave-bar"></span>
+                    <span class="voice-wave-bar"></span>
+                    <span class="voice-wave-bar"></span>
+                </div>
                 
-                <div id="voice-logo-container" class="khit-logo-container logo-size-lg scale-150">
+                <div id="voice-logo-container" class="khit-logo-container logo-size-lg scale-125 cursor-pointer relative" title="Click to Interrupt">
                     <!-- Outer rotating gear ring -->
                     <div class="khit-logo-outer">
                         <img src="khit logo.png" alt="KHIT Gear" class="khit-logo-img">
@@ -427,6 +491,19 @@
                 </div>
             </div>
             
+            <!-- Voice Mode Action Buttons -->
+            <div class="flex items-center gap-4">
+                <!-- Mute Microphone Toggle Button -->
+                <button id="btn-voice-mute" class="framer-pill-button font-pixel py-2 px-6 text-xs cursor-pointer uppercase flex items-center gap-2">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                    Mute Mic
+                </button>
+                <!-- Exit Voice Mode Button -->
+                <button id="btn-voice-exit" class="framer-pill-button font-pixel py-2 px-6 text-xs cursor-pointer uppercase text-rose-400 hover:text-rose-350">
+                    Exit Voice
+                </button>
+            </div>
+
             <div class="flex items-center gap-2 text-xs text-slate-500 font-medium bg-[#040404]/20 border border-slate-900 px-4 py-2 rounded-full">
                 <span class="w-2 h-2 rounded-full bg-[#5aa2fa] animate-pulse"></span>
                 <span>Voice engine active. Continuous duplex channel.</span>

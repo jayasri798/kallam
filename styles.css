@@ -531,4 +531,57 @@ html, body {
     display: inline-block !important;
 }
 
+/* --- VOICE WAVE SYSTEM --- */
+.voice-wave-container {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    height: 60px !important;
+}
+
+.voice-wave-bar {
+    width: 4px !important;
+    height: 10px !important;
+    background-color: #38bdf8 !important;
+    border-radius: 2px !important;
+    box-shadow: 0 0 8px #38bdf8 !important;
+    transition: height 0.15s ease !important;
+}
+
+/* Different animation delays to simulate a live soundwave spectrum */
+.voice-wave-bar:nth-child(1) { animation: voicePulse 1.2s ease-in-out infinite; }
+.voice-wave-bar:nth-child(2) { animation: voicePulse 0.9s ease-in-out infinite 0.2s; }
+.voice-wave-bar:nth-child(3) { animation: voicePulse 1.4s ease-in-out infinite 0.4s; }
+.voice-wave-bar:nth-child(4) { animation: voicePulse 0.8s ease-in-out infinite 0.1s; }
+.voice-wave-bar:nth-child(5) { animation: voicePulse 1.1s ease-in-out infinite 0.3s; }
+.voice-wave-bar:nth-child(6) { animation: voicePulse 1.3s ease-in-out infinite 0.5s; }
+.voice-wave-bar:nth-child(7) { animation: voicePulse 1.0s ease-in-out infinite 0.2s; }
+
+@keyframes voicePulse {
+    0%, 100% { height: 10px; opacity: 0.6; }
+    50% { height: 50px; opacity: 1; box-shadow: 0 0 15px #38bdf8, 0 0 25px #0284c7; }
+}
+
+.voice-listening .voice-wave-bar {
+    background-color: #22c55e !important;
+    box-shadow: 0 0 8px #22c55e !important;
+    animation-duration: 0.7s !important;
+}
+
+.voice-speaking .voice-wave-bar {
+    background-color: #38bdf8 !important;
+    box-shadow: 0 0 8px #38bdf8 !important;
+    animation-duration: 1.1s !important;
+}
+
+.voice-muted .voice-wave-bar {
+    height: 4px !important;
+    animation: none !important;
+    background-color: #64748b !important;
+    box-shadow: none !important;
+    opacity: 0.4 !important;
+}
+
+
 

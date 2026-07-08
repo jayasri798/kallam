@@ -175,6 +175,24 @@ document.addEventListener("DOMContentLoaded", () => {
     try { calendarInspectorDate = document.getElementById("calendar-inspector-date"); } catch(e) {}
     try { calendarInspectorList = document.getElementById("calendar-inspector-list"); } catch(e) {}
 
+    // Profile Workspace Elements
+    let btnProfileToggle, profileWorkspace, profileAvatar, profileName, profileEmail, profileRoleBadge, statQueryCount, statLastActive, profileBookmarksList;
+    try { btnProfileToggle = document.getElementById("btn-profile-toggle"); } catch(e) {}
+    try { profileWorkspace = document.getElementById("profile-workspace"); } catch(e) {}
+    try { profileAvatar = document.getElementById("profile-avatar"); } catch(e) {}
+    try { profileName = document.getElementById("profile-name"); } catch(e) {}
+    try { profileEmail = document.getElementById("profile-email"); } catch(e) {}
+    try { profileRoleBadge = document.getElementById("profile-role-badge"); } catch(e) {}
+    try { statQueryCount = document.getElementById("stat-query-count"); } catch(e) {}
+    try { statLastActive = document.getElementById("stat-last-active"); } catch(e) {}
+    try { profileBookmarksList = document.getElementById("profile-bookmarks-list"); } catch(e) {}
+
+    // Advanced Voice Controls
+    let btnVoiceMute, btnVoiceExit, voiceWaveVisualizer;
+    try { btnVoiceMute = document.getElementById("btn-voice-mute"); } catch(e) {}
+    try { btnVoiceExit = document.getElementById("btn-voice-exit"); } catch(e) {}
+    try { voiceWaveVisualizer = document.getElementById("voice-wave-visualizer"); } catch(e) {}
+
     // Voice Mode Overlay Elements
     let btnVoiceMode;
     try { btnVoiceMode = document.getElementById("btn-voice-mode"); } catch (e) { console.warn("Selector error 'btn-voice-mode':", e); }
@@ -1311,7 +1329,22 @@ function solve(input) {
     let isWakeWordActive = false;
     let capturedSpeechText = "";
 
+    let voiceMicMuted = false;
+
     function setMicState(state) {
+        if (voiceWaveVisualizer) {
+            voiceWaveVisualizer.classList.remove("voice-listening", "voice-speaking", "voice-muted");
+            if (voiceMicMuted) {
+                voiceWaveVisualizer.classList.add("voice-muted");
+            } else if (state === 'listening') {
+                voiceWaveVisualizer.classList.add("voice-listening");
+            } else if (state === 'speaking') {
+                voiceWaveVisualizer.classList.add("voice-speaking");
+            } else {
+                voiceWaveVisualizer.classList.add("voice-speaking"); // pulse state
+            }
+        }
+
         if (state === 'listening') {
             if (voiceOverlayCaptions) {
                 voiceOverlayCaptions.textContent = "Listening... Start speaking.";
@@ -1321,6 +1354,10 @@ function solve(input) {
                 voiceOverlayCaptions.textContent = 'Say "KHIT" to begin speaking...';
             }
             if (interimOverlay) interimOverlay.textContent = "";
+        } else if (state === 'muted') {
+            if (voiceOverlayCaptions) {
+                voiceOverlayCaptions.textContent = "Microphone muted.";
+            }
         } else {
             if (interimOverlay) interimOverlay.textContent = "";
         }
@@ -1656,11 +1693,13 @@ function solve(input) {
     function switchWorkspace(target) {
         // Reset active highlights on header toggle buttons
         if (btnCalendarToggle) btnCalendarToggle.classList.remove("framer-pill-active");
+        if (btnProfileToggle) btnProfileToggle.classList.remove("framer-pill-active");
         if (btnAdminToggle) btnAdminToggle.classList.remove("framer-pill-active");
         
         // Hide all workspace wrappers
         if (chatWorkspace) chatWorkspace.classList.add("hidden");
         if (calendarWorkspace) calendarWorkspace.classList.add("hidden");
+        if (profileWorkspace) profileWorkspace.classList.add("hidden");
         if (adminWorkspace) adminWorkspace.classList.add("hidden");
 
         if (target === "chat") {
@@ -1671,6 +1710,11 @@ function solve(input) {
             if (btnCalendarToggle) btnCalendarToggle.classList.add("framer-pill-active");
             if (btnClearChat) btnClearChat.classList.add("hidden");
             renderInteractiveCalendar(); // Draw calendar
+        } else if (target === "profile") {
+            if (profileWorkspace) profileWorkspace.classList.remove("hidden");
+            if (btnProfileToggle) btnProfileToggle.classList.add("framer-pill-active");
+            if (btnClearChat) btnClearChat.classList.add("hidden");
+            renderUserProfileDashboard(); // Draw profile dashboard
         } else if (target === "admin") {
             if (adminWorkspace) adminWorkspace.classList.remove("hidden");
             if (btnAdminToggle) btnAdminToggle.classList.add("framer-pill-active");
@@ -1678,9 +1722,107 @@ function solve(input) {
         }
     }
 
+    function renderUserProfileDashboard() {
+        if (!currentUserDetails) return;
+
+        if (profileAvatar) profileAvatar.src = currentUserDetails.photoURL || "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y";
+        if (profileName) profileName.textContent = currentUserDetails.displayName || "Academic Guest";
+        if (profileEmail) profileEmail.textContent = currentUserDetails.email || "guest@khit.edu.in";
+        
+        if (profileRoleBadge) {
+            const role = currentUserDetails.accountRole || "student";
+            profileRoleBadge.textContent = role.toUpperCase();
+            if (role === "admin") {
+                profileRoleBadge.className = "text-[10px] uppercase font-bold tracking-wider px-3.5 py-1 rounded-full text-rose-400 bg-rose-500/10 border border-rose-500/20";
+            } else {
+                profileRoleBadge.className = "text-[10px] uppercase font-bold tracking-wider px-3.5 py-1 rounded-full text-[#38bdf8] bg-sky-500/10 border border-sky-500/20";
+            }
+        }
+
+        if (statQueryCount) {
+            const userQueries = chatHistory.filter(turn => turn.role === "user").length;
+            statQueryCount.textContent = userQueries;
+        }
+
+        if (statLastActive) {
+            const dateOptions = { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+            statLastActive.textContent = new Date().toLocaleDateString('en-US', dateOptions);
+        }
+
+        if (profileBookmarksList) {
+            profileBookmarksList.innerHTML = "";
+            const bookmarks = activeCircularsList.slice(0, 3); // list top 3 notices as saved bookmarks for quick access
+            
+            if (bookmarks.length === 0) {
+                profileBookmarksList.innerHTML = `
+                    <div class="text-slate-500 text-[10px] italic text-center py-12">
+                        No bookmarked notices found.
+                    </div>
+                `;
+            } else {
+                bookmarks.forEach(circ => {
+                    const card = document.createElement("div");
+                    card.className = "p-3 rounded-xl border border-slate-900 bg-slate-950/20 hover:border-[#38bdf8]/40 transition cursor-pointer";
+                    card.innerHTML = `
+                        <div class="flex justify-between items-start">
+                            <h4 class="text-xs font-bold text-white uppercase truncate max-w-[140px]">${circ.title}</h4>
+                            <span class="text-[8px] uppercase px-1.5 py-0.5 rounded text-[#38bdf8] bg-sky-500/5">${circ.category}</span>
+                        </div>
+                        <p class="text-[9px] text-slate-500 mt-1 truncate">${circ.summary}</p>
+                    `;
+                    card.addEventListener("click", () => {
+                        switchWorkspace("chat");
+                        submitAcademicQuery(`Details on ${circ.title}`);
+                    });
+                    profileBookmarksList.appendChild(card);
+                });
+            }
+        }
+    }
+
+    if (btnProfileToggle) {
+        btnProfileToggle.addEventListener("click", () => {
+            switchWorkspace("profile");
+        });
+    }
+
     if (btnCalendarToggle) {
         btnCalendarToggle.addEventListener("click", () => {
             switchWorkspace("calendar");
+        });
+    }
+
+    // Voice control event bindings
+    if (btnVoiceMute) {
+        btnVoiceMute.addEventListener("click", () => {
+            voiceMicMuted = !voiceMicMuted;
+            if (voiceMicMuted) {
+                btnVoiceMute.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-slate-500"></span> Unmute Mic`;
+                setMicState('muted');
+                stopPassiveWakeListener();
+                stopActiveQueryCapture();
+            } else {
+                btnVoiceMute.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Mute Mic`;
+                setMicState('idle');
+                startPassiveWakeListener();
+            }
+        });
+    }
+
+    if (btnVoiceExit) {
+        btnVoiceExit.addEventListener("click", () => {
+            if (btnCloseVoice) btnCloseVoice.click();
+        });
+    }
+
+    if (voiceLogoContainer) {
+        voiceLogoContainer.addEventListener("click", () => {
+            if (voiceModeOverlayActive) {
+                // Click interrupts AI narration and returns to listening mode
+                window.speechSynthesis.cancel();
+                showToast("Speech interrupted. Listening...");
+                triggerWakeActivation();
+            }
         });
     }
 
