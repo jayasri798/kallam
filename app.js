@@ -10,7 +10,8 @@ import {
     getRedirectResult,
     GoogleAuthProvider, 
     onAuthStateChanged, 
-    signOut
+    signOut,
+    signInAnonymously
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { 
     getFirestore, 
@@ -75,8 +76,9 @@ document.addEventListener("DOMContentLoaded", () => {
     let appContainer;
     try { appContainer = document.getElementById("app-container"); } catch (e) { console.warn("Selector error 'app-container':", e); }
     
-    let btnLogin;
+    let btnLogin, btnGuestLogin;
     try { btnLogin = document.getElementById("btn-login"); } catch (e) { console.warn("Selector error 'btn-login':", e); }
+    try { btnGuestLogin = document.getElementById("btn-guest-login"); } catch (e) { console.warn("Selector error 'btn-guest-login':", e); }
     
     let btnLogout;
     try { btnLogout = document.getElementById("btn-logout"); } catch (e) { console.warn("Selector error 'btn-logout':", e); }
@@ -400,32 +402,35 @@ Student Supervision: A designated Faculty Advisor oversees student course regist
 
             let role = "student";
             let savedHistory = [];
-            try {
-                console.log("Firestore Sync Init");
-                // Update user record in Firestore
-                const userDocRef = doc(db, "users", user.uid);
-                const userSnap = await getDoc(userDocRef);
-                if (userSnap.exists()) {
-                    const userData = userSnap.data();
-                    role = userData.accountRole || "student";
-                    savedHistory = userData.chatHistory || [];
-                    if (userData.banned === true) {
-                        triggerBanScreen();
-                        return;
+            const isGuest = user.isAnonymous || user.uid === "guest_user_id";
+            if (!isGuest) {
+                try {
+                    console.log("Firestore Sync Init");
+                    // Update user record in Firestore
+                    const userDocRef = doc(db, "users", user.uid);
+                    const userSnap = await getDoc(userDocRef);
+                    if (userSnap.exists()) {
+                        const userData = userSnap.data();
+                        role = userData.accountRole || "student";
+                        savedHistory = userData.chatHistory || [];
+                        if (userData.banned === true) {
+                            triggerBanScreen();
+                            return;
+                        }
                     }
+                    
+                    await setDoc(userDocRef, {
+                        uid: user.uid,
+                        name: user.displayName,
+                        email: user.email,
+                        avatar: user.photoURL,
+                        accountRole: role,
+                        lastActive: new Date()
+                    }, { merge: true });
+                    console.log("User profile synchronised with Firestore cloud architecture.");
+                } catch (error) {
+                    console.error("Firestore user sync error:", error);
                 }
-                
-                await setDoc(userDocRef, {
-                    uid: user.uid,
-                    name: user.displayName,
-                    email: user.email,
-                    avatar: user.photoURL,
-                    accountRole: role,
-                    lastActive: new Date()
-                }, { merge: true });
-                console.log("User profile synchronised with Firestore cloud architecture.");
-            } catch (error) {
-                console.error("Firestore user sync error:", error);
             }
 
             currentUserDetails.accountRole = role;
@@ -499,6 +504,41 @@ Student Supervision: A designated Faculty Advisor oversees student course regist
                         loginError.classList.remove("hidden");
                     }
                     setLoginBtnLoading(false);
+                }
+            }
+        });
+    }
+
+    // 2.5. Campus Guest login click handler with fallback offline mock execution
+    if (btnGuestLogin) {
+        btnGuestLogin.addEventListener("click", async () => {
+            console.log("Guest Login Triggered");
+            try {
+                await signInAnonymously(auth);
+            } catch (err) {
+                console.warn("signInAnonymously failed, triggering offline local guest mode bypass:", err);
+                
+                currentUserDetails = {
+                    uid: "guest_user_id",
+                    displayName: "Academic Guest",
+                    email: "guest@khit.edu.in",
+                    photoURL: ""
+                };
+                currentUserDetails.accountRole = "student";
+                chatHistory = [];
+                
+                setupUserUI(currentUserDetails);
+                showDashboard();
+                
+                try {
+                    const configDocRef = doc(db, "config", "gemini");
+                    const configSnap = await getDoc(configDocRef);
+                    if (configSnap.exists()) {
+                        geminiApiKey = configSnap.data().apiKey || "";
+                        console.log("Gemini API key loaded dynamically in local guest mode.");
+                    }
+                } catch (configErr) {
+                    console.warn("Fallback key loading skipped:", configErr);
                 }
             }
         });
