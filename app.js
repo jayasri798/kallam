@@ -34,6 +34,9 @@ const firebaseConfig = {
   measurementId: 'G-PEK9EKLPC0'
 };
 
+// Dedicated Gemini API Key (Loaded dynamically from Firestore to avoid hardcoded secrets in Git)
+let geminiApiKey = "";
+
 // --- DOM Event Bindings ---
 document.addEventListener("DOMContentLoaded", () => {
     // --- Firebase Initialization inside strict DOM Guard ---
@@ -405,6 +408,18 @@ Student Supervision: A designated Faculty Advisor oversees student course regist
             setupUserUI(currentUserDetails);
             showDashboard();
             subscribeToCirculars();
+
+            // Load Gemini API Key dynamically from Firestore config to avoid secrets leaks
+            try {
+                const configDocRef = doc(db, "config", "gemini");
+                const configSnap = await getDoc(configDocRef);
+                if (configSnap.exists()) {
+                    geminiApiKey = configSnap.data().apiKey || "";
+                    console.log("Gemini API key loaded dynamically from secure config.");
+                }
+            } catch (configErr) {
+                console.warn("Secure config loading skipped or failed:", configErr);
+            }
 
             // Load and render previous chat logs if they exist
             if (chatHistory && chatHistory.length > 0) {
@@ -959,13 +974,12 @@ ${circularsContext}`;
     }
 
     async function callGeminiAPI(systemInstruction, conversationHistory, onComplete, onError) {
-        const apiKey = firebaseConfig.apiKey;
-        if (!apiKey) {
-            if (onError) onError(new Error("Firebase API key is not configured"));
+        if (!geminiApiKey) {
+            if (onError) onError(new Error("Gemini API key is not configured"));
             return;
         }
 
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiApiKey}`;
         
         // Construct payload with system_instruction, balanced temperature, and stateful contents history
         const requestPayload = {
@@ -1860,8 +1874,7 @@ function solve(input) {
     }
 
     async function analyzeCircularFile(file, originalTitle) {
-        const apiKey = firebaseConfig.apiKey;
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiApiKey}`;
         
         const fileExt = file.name.split(".").pop().toLowerCase();
         const isImage = ["jpg", "jpeg", "png"].includes(fileExt);
