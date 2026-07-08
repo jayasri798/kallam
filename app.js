@@ -509,37 +509,37 @@ Student Supervision: A designated Faculty Advisor oversees student course regist
         });
     }
 
-    // 2.5. Campus Guest login click handler with fallback offline mock execution
+    // 2.5. Campus Guest login click handler - instant local transition
     if (btnGuestLogin) {
-        btnGuestLogin.addEventListener("click", async () => {
-            console.log("Guest Login Triggered");
+        btnGuestLogin.addEventListener("click", () => {
+            console.log("Guest Login Triggered - local instant bypass");
+            
+            currentUserDetails = {
+                uid: "guest_user_id",
+                displayName: "Academic Guest",
+                email: "guest@khit.edu.in",
+                photoURL: ""
+            };
+            currentUserDetails.accountRole = "student";
+            chatHistory = [];
+            
+            setupUserUI(currentUserDetails);
+            showDashboard();
+            subscribeToCirculars(); // Listen to DB or fall back to local templates
+            
+            // Fetch Gemini API Key in the background
             try {
-                await signInAnonymously(auth);
-            } catch (err) {
-                console.warn("signInAnonymously failed, triggering offline local guest mode bypass:", err);
-                
-                currentUserDetails = {
-                    uid: "guest_user_id",
-                    displayName: "Academic Guest",
-                    email: "guest@khit.edu.in",
-                    photoURL: ""
-                };
-                currentUserDetails.accountRole = "student";
-                chatHistory = [];
-                
-                setupUserUI(currentUserDetails);
-                showDashboard();
-                
-                try {
-                    const configDocRef = doc(db, "config", "gemini");
-                    const configSnap = await getDoc(configDocRef);
+                const configDocRef = doc(db, "config", "gemini");
+                getDoc(configDocRef).then(configSnap => {
                     if (configSnap.exists()) {
                         geminiApiKey = configSnap.data().apiKey || "";
-                        console.log("Gemini API key loaded dynamically in local guest mode.");
+                        console.log("Gemini API key loaded dynamically in guest mode.");
                     }
-                } catch (configErr) {
-                    console.warn("Fallback key loading skipped:", configErr);
-                }
+                }).catch(configErr => {
+                    console.warn("Dynamic key loading skipped in guest mode:", configErr);
+                });
+            } catch (e) {
+                console.warn("Firestore config query failed in guest mode:", e);
             }
         });
     }
