@@ -36,7 +36,7 @@ const firebaseConfig = {
 };
 
 // Dedicated Gemini API Key (Loaded dynamically from Firestore to avoid hardcoded secrets in Git)
-let geminiApiKey = "AQ.Ab8RN6JLN-o72ruXAZ6fKtjeqsSATh-FvOTvSUR7T_-JMu1Xw";
+let geminiApiKey = "";
 
 // --- DOM Event Bindings ---
 function initializeApplication() {
@@ -448,14 +448,26 @@ Student Supervision: A designated Faculty Advisor oversees student course regist
 
             // Load Gemini API Key dynamically from Firestore config to avoid secrets leaks
             try {
+                let dbKey = null;
                 const configDocRef = doc(db, "config", "gemini");
                 const configSnap = await getDoc(configDocRef);
                 if (configSnap.exists()) {
-                    const dbKey = configSnap.data().apiKey;
-                    if (dbKey) {
-                        geminiApiKey = dbKey;
-                        console.log("Gemini API key loaded dynamically from secure config.");
+                    dbKey = configSnap.data().apiKey;
+                }
+                
+                // Fallback check: look in user's sub-collection config (e.g. /users/{uid}/config/gemini)
+                if (!dbKey && user.uid) {
+                    const userConfigDocRef = doc(db, "users", user.uid, "config", "gemini");
+                    const userConfigSnap = await getDoc(userConfigDocRef);
+                    if (userConfigSnap.exists()) {
+                        dbKey = userConfigSnap.data().apiKey;
+                        console.log("Gemini API key loaded from user sub-collection config.");
                     }
+                }
+                
+                if (dbKey) {
+                    geminiApiKey = dbKey;
+                    console.log("Gemini API key configured successfully.");
                 }
             } catch (configErr) {
                 console.warn("Secure config loading skipped or failed:", configErr);
