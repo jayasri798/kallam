@@ -937,7 +937,7 @@ ${circularsContext}`;
         await callGeminiAPI(
             activeSystemInstruction,
             chatHistory,
-            (responseText, base64Audio, audioMime) => {
+            (responseText) => {
                 removeTypingIndicator(indicator);
                 // Push model response to Conversational Memory State
                 chatHistory.push({
@@ -948,11 +948,9 @@ ${circularsContext}`;
                 appendStreamingBubble(responseText, () => {
                     setLogoProcessing(false);
                     if (voiceModeOverlayActive) {
-                        if (base64Audio) {
-                            playBase64Audio(base64Audio, audioMime);
-                        } else {
-                            vocalizeResponse(responseText);
-                        }
+                        const langSelector = document.getElementById("sel-voice-lang");
+                        const selectedLang = langSelector ? langSelector.value : "en-IN";
+                        playGoogleTranslateTTS(responseText, selectedLang);
                     }
                 });
             },
@@ -967,7 +965,9 @@ ${circularsContext}`;
                 appendStreamingBubble(fallbackText, () => {
                     setLogoProcessing(false);
                     if (voiceModeOverlayActive) {
-                        vocalizeResponse(fallbackText);
+                        const langSelector = document.getElementById("sel-voice-lang");
+                        const selectedLang = langSelector ? langSelector.value : "en-IN";
+                        playGoogleTranslateTTS(fallbackText, selectedLang);
                     }
                 });
             }
@@ -1041,17 +1041,6 @@ ${circularsContext}`;
             }))
         };
 
-        if (voiceModeOverlayActive) {
-            requestPayload.generationConfig.responseModalities = ["TEXT", "AUDIO"];
-            requestPayload.speechConfig = {
-                voiceConfig: {
-                    prebuiltVoiceConfig: {
-                        voiceName: "Aoede" // Premium cute, sweet female voice
-                    }
-                }
-            };
-        }
-        
         try {
             const response = await fetch(url, {
                 method: "POST",
@@ -1078,16 +1067,10 @@ ${circularsContext}`;
                 console.log(`%c[KHIT-Pulse Token Tracking] Turn #${sessionTokenStats.requestCount} | Prompt Tokens: ${usage.promptTokenCount} | Candidate Tokens: ${usage.candidatesTokenCount} | Total Session Tokens: ${sessionTokenStats.totalTokens}`, 'color: #38bdf8; font-weight: bold;');
             }
             
-            const parts = data.candidates?.[0]?.content?.parts || [];
-            const textPart = parts.find(p => p.text);
-            const responseText = textPart ? textPart.text : "";
-            
-            const audioPart = parts.find(p => p.inlineData);
-            const base64Audio = audioPart?.inlineData?.data || "";
-            const audioMime = audioPart?.inlineData?.mimeType || "";
+            const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
 
             if (responseText) {
-                if (onComplete) onComplete(responseText, base64Audio, audioMime);
+                if (onComplete) onComplete(responseText);
             } else {
                 throw new Error("Empty response from Gemini API");
             }
@@ -1611,62 +1594,88 @@ function solve(input) {
         window.speechSynthesis.speak(utterance);
     }
 
-    function playBase64Audio(base64Data, mimeType) {
+    function playGoogleTranslateTTS(text, langCode) {
         stopActiveAudio();
         window.speechSynthesis.cancel();
         
         try {
-            const binaryString = atob(base64Data);
-            const len = binaryString.length;
-            const bytes = new Uint8Array(len);
-            for (let i = 0; i < len; i++) {
-                bytes[i] = binaryString.charCodeAt(i);
+            // Normalize language code to Google Translate locale prefix (e.g. te-IN -> te)
+            const lang = langCode ? langCode.split("-")[0] : "en";
+            
+            // Clean markdown syntax characters for clean narration
+            const cleanText = text.replace(/[*_#`\[\]()\-+]/g, " ").replace(/\s+/g, " ").trim();
+            
+            const chunks = chunkText(cleanText, 140);
+            let currentChunkIndex = 0;
+            
+            function playNextChunk() {
+                if (!voiceModeOverlayActive) {
+                    stopActiveAudio();
+                    return;
+                }
+                
+                if (currentChunkIndex >= chunks.length) {
+                    console.log("Google Translate TTS playback completed.");
+                    setLogoProcessing(false);
+                    currentAudioElement = null;
+                    
+                    if (voiceModeOverlayActive && !voiceMicMuted) {
+                        setTimeout(() => {
+                            startActiveQueryCapture();
+                        }, 500);
+                    }
+                    return;
+                }
+                
+                const chunk = chunks[currentChunkIndex];
+                const encodedText = encodeURIComponent(chunk);
+                const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&tl=${lang}&client=tw-ob&q=${encodedText}`;
+                
+                currentAudioElement = new Audio(ttsUrl);
+                currentAudioElement.onplay = () => {
+                    setMicState('speaking');
+                };
+                currentAudioElement.onended = () => {
+                    currentChunkIndex++;
+                    playNextChunk();
+                };
+                currentAudioElement.onerror = (err) => {
+                    console.error("Google TTS chunk playback error:", err);
+                    currentChunkIndex++;
+                    playNextChunk();
+                };
+                currentAudioElement.play().catch(e => {
+                    console.warn("Play blocked, falling back to next chunk:", e);
+                    currentChunkIndex++;
+                    playNextChunk();
+                });
             }
             
-            const blob = new Blob([bytes], { type: mimeType || "audio/mp3" });
-            const audioUrl = URL.createObjectURL(blob);
-            
-            currentAudioElement = new Audio(audioUrl);
-            
-            currentAudioElement.onplay = () => {
-                setMicState('speaking');
-            };
-            
-            currentAudioElement.onended = () => {
-                console.log("Gemini native voice playback completed.");
-                setLogoProcessing(false);
-                URL.revokeObjectURL(audioUrl);
-                currentAudioElement = null;
-                
-                if (voiceModeOverlayActive && !voiceMicMuted) {
-                    setTimeout(() => {
-                        startActiveQueryCapture();
-                    }, 500);
-                }
-            };
-            
-            currentAudioElement.onerror = (err) => {
-                console.error("Audio playback error:", err);
-                setLogoProcessing(false);
-                URL.revokeObjectURL(audioUrl);
-                currentAudioElement = null;
-                
-                if (voiceModeOverlayActive && !voiceMicMuted) {
-                    setTimeout(() => {
-                        startActiveQueryCapture();
-                    }, 500);
-                }
-            };
-            
-            currentAudioElement.play();
+            playNextChunk();
         } catch (e) {
-            console.error("Failed to decode or play base64 audio:", e);
+            console.error("Failed to play Google Translate TTS:", e);
             setLogoProcessing(false);
-            
             if (voiceModeOverlayActive && !voiceMicMuted) {
                 startActiveQueryCapture();
             }
         }
+    }
+
+    function chunkText(text, maxLength) {
+        const words = text.split(" ");
+        const chunks = [];
+        let currentChunk = "";
+        
+        for (const word of words) {
+            if ((currentChunk + " " + word).length > maxLength) {
+                if (currentChunk) chunks.push(currentChunk.trim());
+                currentChunk = word;
+            } else {
+                currentChunk += " " + word;
+            }
+        }
+        if (currentChunk) chunks.push(currentChunk.trim());
+        return chunks;
     }
 
     function stopActiveAudio() {
