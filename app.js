@@ -1189,10 +1189,10 @@ function solve(input) {
         const avatar = `<div class="khit-logo-float-wrapper shrink-0">
                   <div class="khit-logo-container logo-size-sm">
                       <div class="khit-logo-outer">
-                          <img src="kallam logo.png" alt="KHIT Gear" class="khit-logo-img">
+                          <img src="khit logo.png" alt="KHIT Gear" class="khit-logo-img">
                       </div>
                       <div class="khit-logo-inner">
-                          <img src="kallam logo.png" alt="KHIT Globe" class="khit-logo-img">
+                          <img src="khit logo.png" alt="KHIT Globe" class="khit-logo-img">
                       </div>
                   </div>
                </div>`;
@@ -1244,10 +1244,10 @@ function solve(input) {
             : `<div class="khit-logo-float-wrapper shrink-0">
                   <div class="khit-logo-container logo-size-sm">
                       <div class="khit-logo-outer">
-                          <img src="kallam logo.png" alt="KHIT Gear" class="khit-logo-img">
+                          <img src="khit logo.png" alt="KHIT Gear" class="khit-logo-img">
                       </div>
                       <div class="khit-logo-inner">
-                          <img src="kallam logo.png" alt="KHIT Globe" class="khit-logo-img">
+                          <img src="khit logo.png" alt="KHIT Globe" class="khit-logo-img">
                       </div>
                   </div>
                </div>`;
@@ -1274,10 +1274,10 @@ function solve(input) {
             <div class="khit-logo-float-wrapper shrink-0">
                 <div class="khit-logo-container logo-size-sm">
                     <div class="khit-logo-outer">
-                        <img src="kallam logo.png" alt="KHIT Gear" class="khit-logo-img">
+                        <img src="khit logo.png" alt="KHIT Gear" class="khit-logo-img">
                     </div>
                     <div class="khit-logo-inner">
-                        <img src="kallam logo.png" alt="KHIT Globe" class="khit-logo-img">
+                        <img src="khit logo.png" alt="KHIT Globe" class="khit-logo-img">
                     </div>
                 </div>
             </div>
@@ -1304,7 +1304,7 @@ function solve(input) {
             }
         } else if (state === 'idle') {
             if (voiceOverlayCaptions) {
-                voiceOverlayCaptions.textContent = 'Say "Kallam" to begin speaking...';
+                voiceOverlayCaptions.textContent = 'Say "KHIT" to begin speaking...';
             }
             if (interimOverlay) interimOverlay.textContent = "";
         } else {
@@ -1341,8 +1341,8 @@ function solve(input) {
                 const transcript = event.results[lastResultIndex][0].transcript.trim().toLowerCase();
                 console.log("KHIT-Pulse passive voice capture:", transcript);
 
-                if (transcript.includes("kallam") || transcript.includes("kalam")) {
-                    console.log("Wake word 'Kallam/Kalam' detected! Triggering active capture...");
+                if (transcript.includes("khit") || transcript.includes("pulse") || transcript.includes("kit") || transcript.includes("kallam")) {
+                    console.log("Wake word 'KHIT' detected! Triggering active capture...");
                     triggerWakeActivation();
                 }
             };
@@ -1591,7 +1591,7 @@ function solve(input) {
             }
             
             if (voiceOverlayCaptions) {
-                voiceOverlayCaptions.textContent = 'Say "Kallam" to begin speaking...';
+                voiceOverlayCaptions.textContent = 'Say "KHIT" to begin speaking...';
             }
             
             stopActiveQueryCapture();
