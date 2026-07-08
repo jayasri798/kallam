@@ -43,6 +43,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
+    let voiceMicMuted = false;
     
     // Provider Scope Isolation
     const provider = new GoogleAuthProvider();
@@ -1351,7 +1352,7 @@ function solve(input) {
     let isWakeWordActive = false;
     let capturedSpeechText = "";
 
-    let voiceMicMuted = false;
+
 
     function setMicState(state) {
         if (voiceWaveVisualizer) {
