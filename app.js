@@ -1883,7 +1883,10 @@ function solve(input) {
         
         try {
             liveWebSocket = new WebSocket(wsUrl);
-            liveAudioPlayer = new PCMAudioPlayer(24000);
+            if (!liveAudioPlayer) {
+                liveAudioPlayer = new PCMAudioPlayer(24000);
+            }
+            liveAudioPlayer.start();
             
             liveWebSocket.onopen = () => {
                 console.log("Gemini Live WebSocket connection established.");
@@ -2032,7 +2035,12 @@ function solve(input) {
     async function startLiveAudioCapture(onAudioPCM) {
         stopLiveAudioCapture();
         try {
-            micAudioContext = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 16000 });
+            if (!micAudioContext) {
+                micAudioContext = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 16000 });
+            }
+            if (micAudioContext.state === 'suspended') {
+                await micAudioContext.resume();
+            }
             micMediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
             micMediaStreamSource = micAudioContext.createMediaStreamSource(micMediaStream);
             micProcessorNode = micAudioContext.createScriptProcessor(2048, 1, 1);
