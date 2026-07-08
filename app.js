@@ -1946,12 +1946,12 @@ function solve(input) {
                 
                 liveWebSocket.send(JSON.stringify(setupMessage));
                 
-                startLiveAudioCapture((base64PCM) => {
+                startLiveAudioCapture((base64PCM, sampleRate) => {
                     if (liveWebSocket && liveWebSocket.readyState === WebSocket.OPEN && !voiceMicMuted) {
                         const audioInputMessage = {
                             realtimeInput: {
                                 mediaChunks: [{
-                                    mimeType: "audio/pcm;rate=16000",
+                                    mimeType: `audio/pcm;rate=${sampleRate}`,
                                     data: base64PCM
                                 }]
                             }
@@ -2062,11 +2062,12 @@ function solve(input) {
         stopLiveAudioCapture();
         try {
             if (!micAudioContext) {
-                micAudioContext = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 16000 });
+                micAudioContext = new (window.AudioContext || window.webkitAudioContext)();
             }
             if (micAudioContext.state === 'suspended') {
                 await micAudioContext.resume();
             }
+            const currentSampleRate = micAudioContext.sampleRate;
             micMediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
             micMediaStreamSource = micAudioContext.createMediaStreamSource(micMediaStream);
             micProcessorNode = micAudioContext.createScriptProcessor(2048, 1, 1);
@@ -2091,7 +2092,7 @@ function solve(input) {
                 }
                 const base64PCM = btoa(binary);
                 
-                if (onAudioPCM) onAudioPCM(base64PCM);
+                if (onAudioPCM) onAudioPCM(base64PCM, currentSampleRate);
             };
             
             micMediaStreamSource.connect(micProcessorNode);
