@@ -560,7 +560,8 @@ Student Supervision: A designated Faculty Advisor oversees student course regist
         if (welcomeView) {
             const welcomeSpan = welcomeView.querySelector("h2 span");
             if (welcomeSpan) {
-                welcomeSpan.textContent = `Hello, ${user.displayName.split(" ")[0]}.`;
+                const name = user.displayName ? user.displayName.split(" ")[0] : "Academic Guest";
+                welcomeSpan.textContent = `Hello, ${name}.`;
             }
         }
     }
@@ -1293,7 +1294,7 @@ function solve(input) {
         }`;
         
         const avatar = sender === "user"
-            ? `<div class="w-9 h-9 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-[10px] font-bold text-white shadow-md avatar-glow shrink-0">${currentUserDetails?.displayName.split(" ").map(n => n[0]).join("") || 'U'}</div>`
+            ? `<div class="w-9 h-9 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-[10px] font-bold text-white shadow-md avatar-glow shrink-0">${(currentUserDetails?.displayName || "Academic Guest").split(" ").map(n => n[0]).join("")}</div>`
             : `<div class="khit-logo-float-wrapper shrink-0">
                   <div class="khit-logo-container logo-size-sm">
                       <div class="khit-logo-outer">
