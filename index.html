@@ -14,24 +14,25 @@
     <!-- Custom Style Sheet -->
     <link rel="stylesheet" href="styles.css">
 </head>
-<body class="bg-[#040404] text-slate-200 min-h-screen font-grotesk antialiased relative overflow-hidden">
+<body class="bg-[#020203] text-slate-200 min-h-screen font-grotesk antialiased relative overflow-hidden">
     
-    <!-- Gemini-Style Subtle Ambient Backlight -->
-    <div class="absolute top-[20%] right-[10%] w-[40vw] h-[40vw] rounded-full bg-blue-900/5 blur-[150px] pointer-events-none"></div>
-    <div class="absolute bottom-[10%] left-[5%] w-[35vw] h-[35vw] rounded-full bg-indigo-950/10 blur-[120px] pointer-events-none"></div>
+    <!-- Ambient Glassmorphic Background Blobs -->
+    <div class="ambient-blob blob-purple"></div>
+    <div class="ambient-blob blob-cyan"></div>
+    <div class="ambient-blob blob-pink"></div>
 
     <!-- Centered Landing Screen (Login Overlay) -->
-    <div id="login-screen" class="fixed inset-0 z-50 flex flex-col items-center justify-center p-6 bg-[#040404]/95 backdrop-blur-md transition-all duration-500">
+    <div id="login-screen" class="fixed inset-0 z-50 flex flex-col items-center justify-center p-6 bg-[#020203]/95 backdrop-blur-md transition-all duration-500">
         <div class="max-w-md w-full text-center space-y-8 p-10 framer-neon-card relative">
             <!-- Neon blue accent indicator -->
-            <div class="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#38bdf8] to-transparent"></div>
+            <div class="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#8b5cf6] to-transparent"></div>
             
             <div class="space-y-4">
-                <div class="inline-flex items-center justify-center px-3.5 py-1 rounded-full bg-sky-950/60 border border-sky-400/40 text-[10px] font-bold text-sky-400 tracking-wider uppercase mb-1 neon-icon-glow">
-                    Academic Engine
+                <div class="inline-flex items-center justify-center px-3.5 py-1 rounded-full bg-purple-950/60 border border-purple-400/40 text-[10px] font-bold text-purple-300 tracking-wider uppercase mb-1 neon-icon-glow">
+                    Autonomous AI System
                 </div>
-                <h1 class="text-3xl md:text-4xl font-pixel font-bold tracking-tight text-white uppercase">KHIT <span class="text-[#38bdf8]">Pulse</span></h1>
-                <p class="text-slate-400 text-xs max-w-xs mx-auto font-grotesk leading-relaxed">Access real-time circular logs and college intelligence through an autonomous conversational terminal.</p>
+                <h1 class="text-4xl md:text-5xl font-pixel font-bold tracking-tight text-white uppercase animated-gradient-text">KHIT Pulse</h1>
+                <p class="text-slate-400 text-xs max-w-xs mx-auto font-grotesk leading-relaxed">Access campus intelligence, dynamic notice analysis, and duplex voice channels through a next-gen terminal.</p>
             </div>
             
             <div class="pt-4">

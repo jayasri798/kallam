@@ -4,13 +4,74 @@
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Silkscreen:wght@400;700&display=swap');
 
 :root {
-    --bg-primary: #040404;
-    --accent-cobalt: #0284c7;
+    --bg-primary: #020203; /* Obsidian pitch-black */
+    --accent-cobalt: #6366f1;
     --accent-cyan: #38bdf8;
+    --accent-purple: #8b5cf6;
+    --accent-magenta: #d946ef;
     --font-body: 'Space Grotesk', sans-serif;
     --font-header: 'Silkscreen', monospace;
-    --glass-bg: rgba(10, 10, 10, 0.4);
-    --glass-border: rgba(255, 255, 255, 0.06);
+    --glass-bg: rgba(10, 10, 15, 0.45);
+    --glass-border: rgba(255, 255, 255, 0.08);
+}
+
+/* --- AMBIENT GRADIENT BLOBS --- */
+.ambient-blob {
+    position: absolute !important;
+    border-radius: 50% !important;
+    filter: blur(140px) !important;
+    opacity: 0.12 !important;
+    mix-blend-mode: screen !important;
+    pointer-events: none !important;
+    animation: blobFloat 22s ease-in-out infinite alternate !important;
+    z-index: 0 !important;
+}
+
+.blob-purple {
+    background: radial-gradient(circle, var(--accent-purple), var(--accent-magenta)) !important;
+    width: 50vw !important;
+    height: 50vw !important;
+    top: -15% !important;
+    left: -15% !important;
+}
+
+.blob-cyan {
+    background: radial-gradient(circle, var(--accent-cyan), #3b82f6) !important;
+    width: 45vw !important;
+    height: 45vw !important;
+    bottom: -15% !important;
+    right: -15% !important;
+    animation-delay: -6s !important;
+}
+
+.blob-pink {
+    background: radial-gradient(circle, var(--accent-magenta), var(--accent-purple)) !important;
+    width: 35vw !important;
+    height: 35vw !important;
+    top: 40% !important;
+    left: 45% !important;
+    animation-delay: -12s !important;
+}
+
+@keyframes blobFloat {
+    0% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(8%, 10%) scale(1.15); }
+    100% { transform: translate(-5%, -8%) scale(0.95); }
+}
+
+/* --- GRADIENT RUNNING TEXT --- */
+.animated-gradient-text {
+    background: linear-gradient(to right, var(--accent-cyan), var(--accent-purple), var(--accent-magenta), var(--accent-cyan)) !important;
+    background-size: 300% 100% !important;
+    -webkit-background-clip: text !important;
+    background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    animation: gradientTextRun 8s linear infinite !important;
+}
+
+@keyframes gradientTextRun {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 300% 50%; }
 }
 
 /* Custom global browser scrollbar overrides */
