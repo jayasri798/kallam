@@ -46,12 +46,7 @@ function initializeApplication() {
     const db = getFirestore(app);
     let voiceMicMuted = false;
     let currentAudioElement = null;
-    let liveWebSocket = null;
-    let liveAudioPlayer = null;
-    let micAudioContext = null;
-    let micMediaStream = null;
-    let micMediaStreamSource = null;
-    let micProcessorNode = null;
+
     
     // Provider Scope Isolation
     const provider = new GoogleAuthProvider();
@@ -1520,12 +1515,7 @@ function solve(input) {
             return;
         }
 
-        const engineSelector = document.getElementById("sel-voice-engine");
-        const selectedEngine = engineSelector ? engineSelector.value : "live";
-        if (selectedEngine === "live") {
-            startLiveWebSocket();
-            return;
-        }
+
 
         if (!SpeechRecognition) {
             showToast("Speech recognition is not supported in this browser.");
@@ -1617,7 +1607,6 @@ function solve(input) {
     }
 
     function stopActiveQueryCapture() {
-        stopLiveWebSocket();
         if (activeRecognition) {
             try {
                 activeRecognition.stop();
@@ -1790,339 +1779,13 @@ function solve(input) {
         }
     }
 
-    class PCMAudioPlayer {
-        constructor(sampleRate = 24000) {
-            this.sampleRate = sampleRate;
-            this.audioCtx = null;
-            this.nextPlayTime = 0;
-            this.gainNode = null;
-            this.isPlaying = false;
-        }
 
-        start() {
-            if (this.isPlaying) return;
-            this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            this.gainNode = this.audioCtx.createGain();
-            this.gainNode.connect(this.audioCtx.destination);
-            this.nextPlayTime = this.audioCtx.currentTime;
-            this.isPlaying = true;
-        }
 
-        stop() {
-            if (this.audioCtx) {
-                try {
-                    this.audioCtx.close();
-                } catch(e) {}
-                this.audioCtx = null;
-            }
-            this.nextPlayTime = 0;
-            this.isPlaying = false;
-        }
 
-        playChunk(base64Data) {
-            if (!this.isPlaying) this.start();
-            if (!this.audioCtx) return;
 
-            try {
-                const binaryString = atob(base64Data);
-                const len = binaryString.length;
-                const buffer = new ArrayBuffer(len);
-                const view = new DataView(buffer);
-                for (let i = 0; i < len; i++) {
-                    view.setUint8(i, binaryString.charCodeAt(i));
-                }
 
-                const numSamples = len / 2;
-                const floatData = new Float32Array(numSamples);
-                for (let i = 0; i < numSamples; i++) {
-                    const val = view.getInt16(i * 2, true);
-                    floatData[i] = val / 32768.0;
-                }
 
-                const audioBuffer = this.audioCtx.createBuffer(1, numSamples, this.sampleRate);
-                audioBuffer.getChannelData(0).set(floatData);
 
-                const source = this.audioCtx.createBufferSource();
-                source.buffer = audioBuffer;
-                source.connect(this.gainNode);
-
-                const now = this.audioCtx.currentTime;
-                if (this.nextPlayTime < now) {
-                    this.nextPlayTime = now;
-                }
-
-                source.start(this.nextPlayTime);
-                this.nextPlayTime += audioBuffer.duration;
-            } catch(e) {
-                console.error("PCM Decryption/playback chunk failed:", e);
-            }
-        }
-    }
-
-    function compileSearchNoticeContext() {
-        let texts = [];
-        texts.push("=== OFFICIAL COLLEGE PROFILE AND FACTS ===");
-        texts.push(KHIT_COLLEGE_INFO);
-        
-        texts.push("\n=== CURRENT ACTIVE CIRCULARS & NOTICES ===");
-        if (activeCircularsList && activeCircularsList.length > 0) {
-            activeCircularsList.forEach(log => {
-                texts.push(`[Circular Document ${log.id}]`);
-                texts.push(`Title: ${log.title}`);
-                texts.push(`Category: ${log.category}`);
-                texts.push(`Date: ${log.date}`);
-                texts.push(`Summary: ${log.summary}`);
-                texts.push(`Details: ${log.fullText || log.summary}`);
-                texts.push("---------------------");
-            });
-        } else {
-            texts.push("No notices are currently on the bulletin board.");
-        }
-        return texts.join("\n");
-    }
-
-    function startLiveWebSocket() {
-        stopLiveWebSocket();
-        
-        if (!geminiApiKey) {
-            showToast("Gemini API key is not configured.");
-            const engineSelector = document.getElementById("sel-voice-engine");
-            if (engineSelector) engineSelector.value = "talkback";
-            startActiveQueryCapture();
-            return;
-        }
-
-        setMicState('listening');
-        if (voiceOverlayCaptions) {
-            voiceOverlayCaptions.textContent = "Connecting to Gemini Live pipeline...";
-        }
-
-        const wsUrl = `wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContent?key=${geminiApiKey}`;
-        
-        try {
-            liveWebSocket = new WebSocket(wsUrl);
-            if (!liveAudioPlayer) {
-                liveAudioPlayer = new PCMAudioPlayer(24000);
-            }
-            liveAudioPlayer.start();
-            
-            liveWebSocket.onopen = () => {
-                console.log("Gemini Live WebSocket connection established.");
-                if (voiceOverlayCaptions) {
-                    voiceOverlayCaptions.textContent = "Connected! Speak to Gemini Live...";
-                }
-                
-                let activeSystemInstruction = systemInstruction;
-                const langSelector = document.getElementById("sel-voice-lang");
-                if (langSelector && langSelector.value === "te-IN") {
-                    activeSystemInstruction += `\n\n5. LANGUAGE REQUIREMENT: You MUST speak and reply ONLY in the TELUGU language. Respond with clear, natural Telugu voice output.`;
-                } else {
-                    activeSystemInstruction += `\n\n5. LANGUAGE REQUIREMENT: Speak and reply in English.`;
-                }
-
-                const searchNoticeContext = compileSearchNoticeContext();
-                if (searchNoticeContext) {
-                    activeSystemInstruction += `\n\n6. LIVE NOTICE CONTEXT (RAG DATABASE):\n${searchNoticeContext}`;
-                }
-
-                const setupMessage = {
-                    setup: {
-                        model: "models/gemini-2.0-flash-exp",
-                        generationConfig: {
-                            responseModalities: ["AUDIO"],
-                            speechConfig: {
-                                voiceConfig: {
-                                    prebuiltVoiceConfig: {
-                                        voiceName: "Aoede" // Premium cute, sweet voice
-                                    }
-                                }
-                            }
-                        },
-                        systemInstruction: {
-                            parts: [{ text: activeSystemInstruction }]
-                        }
-                    }
-                };
-                
-                liveWebSocket.send(JSON.stringify(setupMessage));
-                
-                startLiveAudioCapture((base64PCM, sampleRate) => {
-                    if (liveWebSocket && liveWebSocket.readyState === WebSocket.OPEN && !voiceMicMuted) {
-                        const audioInputMessage = {
-                            realtimeInput: {
-                                mediaChunks: [{
-                                    mimeType: `audio/pcm;rate=${sampleRate}`,
-                                    data: base64PCM
-                                }]
-                            }
-                        };
-                        liveWebSocket.send(JSON.stringify(audioInputMessage));
-                    }
-                });
-            };
-            
-            liveWebSocket.onmessage = (event) => {
-                try {
-                    const data = JSON.parse(event.data);
-                    
-                    if (data.serverContent) {
-                        if (data.serverContent.interrupted) {
-                            console.log("Gemini Live interrupted by user speech.");
-                            if (liveAudioPlayer) {
-                                liveAudioPlayer.stop();
-                                liveAudioPlayer.start();
-                            }
-                            setMicState('listening');
-                            return;
-                        }
-                        
-                        if (data.serverContent.modelTurn?.parts) {
-                            for (const part of data.serverContent.modelTurn.parts) {
-                                if (part.inlineData && part.inlineData.data) {
-                                    if (liveAudioPlayer) {
-                                        liveAudioPlayer.playChunk(part.inlineData.data);
-                                    }
-                                    setMicState('speaking');
-                                    if (voiceOverlayCaptions) {
-                                        voiceOverlayCaptions.textContent = "Gemini Live responding...";
-                                    }
-                                }
-                                if (part.text) {
-                                    if (voiceOverlayCaptions) {
-                                        voiceOverlayCaptions.textContent = part.text;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                } catch(e) {
-                    console.error("Gemini Live message parsing failed:", e);
-                }
-            };
-            
-            liveWebSocket.onclose = (e) => {
-                console.warn("Gemini Live WebSocket closed code:", e.code);
-                stopLiveWebSocket();
-                if (voiceModeOverlayActive) {
-                    setMicState('off');
-                    if (voiceOverlayCaptions) {
-                        voiceOverlayCaptions.textContent = "Connection lost. Reconnecting...";
-                    }
-                    setTimeout(() => {
-                        if (voiceModeOverlayActive && !voiceMicMuted) {
-                            startLiveWebSocket();
-                        }
-                    }, 2000);
-                }
-            };
-            
-            liveWebSocket.onerror = (err) => {
-                console.error("Gemini Live WebSocket Error:", err);
-                stopLiveWebSocket();
-                
-                if (voiceOverlayCaptions) {
-                    voiceOverlayCaptions.textContent = "Gemini Live Error. Make sure a valid Gemini API Key (starts with AIzaSy) is set in your database config.";
-                }
-                
-                showToast("Connection to Gemini Live failed. Falling back to Talkback...");
-                
-                setTimeout(() => {
-                    if (voiceModeOverlayActive) {
-                        const engineSelector = document.getElementById("sel-voice-engine");
-                        if (engineSelector) engineSelector.value = "talkback";
-                        startActiveQueryCapture();
-                    }
-                }, 3500);
-            };
-        } catch(e) {
-            console.error("WebSocket setup exception:", e);
-            stopLiveWebSocket();
-        }
-    }
-
-    function stopLiveWebSocket() {
-        stopLiveAudioCapture();
-        if (liveAudioPlayer) {
-            liveAudioPlayer.stop();
-            liveAudioPlayer = null;
-        }
-        if (liveWebSocket) {
-            try {
-                liveWebSocket.onopen = null;
-                liveWebSocket.onmessage = null;
-                liveWebSocket.onerror = null;
-                liveWebSocket.onclose = null;
-                liveWebSocket.close();
-            } catch(e) {}
-            liveWebSocket = null;
-        }
-    }
-
-    async function startLiveAudioCapture(onAudioPCM) {
-        stopLiveAudioCapture();
-        try {
-            if (!micAudioContext) {
-                micAudioContext = new (window.AudioContext || window.webkitAudioContext)();
-            }
-            if (micAudioContext.state === 'suspended') {
-                await micAudioContext.resume();
-            }
-            const currentSampleRate = micAudioContext.sampleRate;
-            micMediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            micMediaStreamSource = micAudioContext.createMediaStreamSource(micMediaStream);
-            micProcessorNode = micAudioContext.createScriptProcessor(2048, 1, 1);
-            
-            micProcessorNode.onaudioprocess = (e) => {
-                if (voiceMicMuted || !voiceModeOverlayActive) return;
-                
-                const inputData = e.inputBuffer.getChannelData(0);
-                const numSamples = inputData.length;
-                const pcmBuffer = new Int16Array(numSamples);
-                
-                for (let i = 0; i < numSamples; i++) {
-                    const s = Math.max(-1, Math.min(1, inputData[i]));
-                    pcmBuffer[i] = s < 0 ? s * 32768 : s * 32767;
-                }
-                
-                let binary = '';
-                const bytes = new Uint8Array(pcmBuffer.buffer);
-                const len = bytes.byteLength;
-                for (let i = 0; i < len; i++) {
-                    binary += String.fromCharCode(bytes[i]);
-                }
-                const base64PCM = btoa(binary);
-                
-                if (onAudioPCM) onAudioPCM(base64PCM, currentSampleRate);
-            };
-            
-            micMediaStreamSource.connect(micProcessorNode);
-            micProcessorNode.connect(micAudioContext.destination);
-        } catch (err) {
-            console.error("Microphone capture access failed:", err);
-            showToast("Microphone capture access failed.");
-        }
-    }
-
-    function stopLiveAudioCapture() {
-        if (micProcessorNode) {
-            try { micProcessorNode.disconnect(); } catch(e) {}
-            micProcessorNode = null;
-        }
-        if (micMediaStreamSource) {
-            try { micMediaStreamSource.disconnect(); } catch(e) {}
-            micMediaStreamSource = null;
-        }
-        if (micMediaStream) {
-            try {
-                micMediaStream.getTracks().forEach(track => track.stop());
-            } catch(e) {}
-            micMediaStream = null;
-        }
-        if (micAudioContext) {
-            try { micAudioContext.close(); } catch(e) {}
-            micAudioContext = null;
-        }
-    }
 
     function playSynthesizedChime() {
         try {
@@ -2161,28 +1824,9 @@ function solve(input) {
         }, 3000);
     }
 
-    function initializeAudioOnUserGesture() {
-        if (!liveAudioPlayer) {
-            liveAudioPlayer = new PCMAudioPlayer(24000);
-        }
-        liveAudioPlayer.start();
-        
-        if (!micAudioContext) {
-            try {
-                micAudioContext = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 16000 });
-            } catch(e) {
-                console.warn("Failed to allocate audio input context on gesture:", e);
-            }
-        }
-        if (micAudioContext && micAudioContext.state === 'suspended') {
-            micAudioContext.resume().catch(e => console.warn(e));
-        }
-    }
-
     // --- Voice Mode Overlay Transition Handlers ---
     if (btnVoiceMode) {
         btnVoiceMode.addEventListener("click", () => {
-            initializeAudioOnUserGesture();
             voiceModeOverlayActive = true;
             
             if (voiceOverlay) {
@@ -2360,7 +2004,6 @@ function solve(input) {
                 stopActiveQueryCapture();
             } else {
                 btnVoiceMute.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Mute Mic`;
-                initializeAudioOnUserGesture();
                 startActiveQueryCapture();
             }
         });
@@ -2372,18 +2015,7 @@ function solve(input) {
         });
     }
 
-    const selVoiceEngine = document.getElementById("sel-voice-engine");
-    if (selVoiceEngine) {
-        selVoiceEngine.addEventListener("change", () => {
-            console.log("Voice Engine changed, restarting session...");
-            stopActiveQueryCapture();
-            setTimeout(() => {
-                if (voiceModeOverlayActive) {
-                    startActiveQueryCapture();
-                }
-            }, 300);
-        });
-    }
+
 
     if (voiceLogoContainer) {
         voiceLogoContainer.addEventListener("click", () => {
@@ -2924,21 +2556,10 @@ Ensure the output is ONLY a valid JSON object, without any markdown code blocks,
     // Reconnect voice session if browser suspends tab in background (visibility change or pageshow)
     document.addEventListener("visibilitychange", () => {
         if (document.visibilityState === "visible") {
-            console.log("Tab returned to foreground. Verifying active voice session status...");
+            console.log("Tab returned to foreground. Resuming audio contexts...");
             if (voiceModeOverlayActive) {
                 if (micAudioContext && micAudioContext.state === 'suspended') {
                     micAudioContext.resume().catch(e => console.warn(e));
-                }
-                if (liveAudioPlayer) {
-                    liveAudioPlayer.start();
-                }
-                const engineSelector = document.getElementById("sel-voice-engine");
-                const selectedEngine = engineSelector ? engineSelector.value : "live";
-                if (selectedEngine === "live") {
-                    if (!liveWebSocket || liveWebSocket.readyState !== WebSocket.OPEN) {
-                        console.log("Re-establishing background-suspended live websocket...");
-                        startLiveWebSocket();
-                    }
                 }
             }
         }
@@ -2946,20 +2567,10 @@ Ensure the output is ONLY a valid JSON object, without any markdown code blocks,
 
     window.addEventListener("pageshow", (event) => {
         if (event.persisted) {
-            console.log("Page restored from back-forward cache. Restarting voice contexts...");
+            console.log("Page restored from back-forward cache. Resuming audio contexts...");
             if (voiceModeOverlayActive) {
                 if (micAudioContext && micAudioContext.state === 'suspended') {
                     micAudioContext.resume().catch(e => console.warn(e));
-                }
-                if (liveAudioPlayer) {
-                    liveAudioPlayer.start();
-                }
-                const engineSelector = document.getElementById("sel-voice-engine");
-                const selectedEngine = engineSelector ? engineSelector.value : "live";
-                if (selectedEngine === "live") {
-                    if (!liveWebSocket || liveWebSocket.readyState !== WebSocket.OPEN) {
-                        startLiveWebSocket();
-                    }
                 }
             }
         }
