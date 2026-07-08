@@ -2126,9 +2126,28 @@ function solve(input) {
         }, 3000);
     }
 
+    function initializeAudioOnUserGesture() {
+        if (!liveAudioPlayer) {
+            liveAudioPlayer = new PCMAudioPlayer(24000);
+        }
+        liveAudioPlayer.start();
+        
+        if (!micAudioContext) {
+            try {
+                micAudioContext = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 16000 });
+            } catch(e) {
+                console.warn("Failed to allocate audio input context on gesture:", e);
+            }
+        }
+        if (micAudioContext && micAudioContext.state === 'suspended') {
+            micAudioContext.resume().catch(e => console.warn(e));
+        }
+    }
+
     // --- Voice Mode Overlay Transition Handlers ---
     if (btnVoiceMode) {
         btnVoiceMode.addEventListener("click", () => {
+            initializeAudioOnUserGesture();
             voiceModeOverlayActive = true;
             
             if (voiceOverlay) {
@@ -2306,6 +2325,7 @@ function solve(input) {
                 stopActiveQueryCapture();
             } else {
                 btnVoiceMute.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Mute Mic`;
+                initializeAudioOnUserGesture();
                 startActiveQueryCapture();
             }
         });
