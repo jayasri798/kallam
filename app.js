@@ -39,7 +39,7 @@ const firebaseConfig = {
 let geminiApiKey = "";
 
 // --- DOM Event Bindings ---
-document.addEventListener("DOMContentLoaded", () => {
+function initializeApplication() {
     // --- Firebase Initialization inside strict DOM Guard ---
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
@@ -2521,4 +2521,10 @@ Ensure the output is ONLY a valid JSON object, without any markdown code blocks,
             renderInteractiveCalendar();
         });
     }
-});
+}
+
+if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initializeApplication);
+} else {
+    initializeApplication();
+}
