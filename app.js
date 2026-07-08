@@ -406,6 +406,10 @@ Student Supervision: A designated Faculty Advisor oversees student course regist
                     const userData = userSnap.data();
                     role = userData.accountRole || "student";
                     savedHistory = userData.chatHistory || [];
+                    if (userData.banned === true) {
+                        triggerBanScreen();
+                        return;
+                    }
                 }
                 
                 await setDoc(userDocRef, {
@@ -840,6 +844,10 @@ Student Supervision: A designated Faculty Advisor oversees student course regist
     }
 
     async function submitAcademicQuery(text) {
+        if (!text) return;
+        const isBanned = await checkAndEnforceBan(text);
+        if (isBanned) return;
+
         if (inputQuery) inputQuery.value = "";
         
         if (welcomeView) welcomeView.classList.add("hidden");
@@ -1000,7 +1008,7 @@ ${circularsContext}`;
 
         const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiApiKey}`;
         
-        // Construct payload with system_instruction, balanced temperature, and stateful contents history
+        // Construct payload with system_instruction, tools (Google Search Grounding), and contents
         const requestPayload = {
             system_instruction: {
                 parts: [{ text: systemInstruction }]
@@ -1008,6 +1016,9 @@ ${circularsContext}`;
             generationConfig: {
                 temperature: 0.2
             },
+            tools: [{
+                googleSearch: {}
+            }],
             contents: conversationHistory.map(turn => ({
                 role: turn.role,
                 parts: turn.parts
@@ -2281,6 +2292,59 @@ Ensure the output is ONLY a valid JSON object, without any markdown code blocks,
                 calendarInspectorList.appendChild(card);
             });
         }
+    }
+
+    // --- Enterprise Security: Content Moderation & Account Banning System ---
+    const BANNED_KEYWORDS = [
+        "sex", "porn", "xxx", "naked", "erotic", "fuck", "dick", "pussy", "boobs", "asshole", "bitch", "nude",
+        "blowjob", "clitoris", "vagina", "penis", "orgasm", "ejaculation", "sensual", "lust", "seduce", "intercourse"
+    ];
+
+    async function checkAndEnforceBan(userQuery) {
+        if (!currentUserDetails) return false;
+        
+        const q = userQuery.toLowerCase();
+        const isViolated = BANNED_KEYWORDS.some(word => q.includes(word));
+        
+        if (isViolated) {
+            console.warn("Safety violation: User query contains forbidden words. Restricting account.");
+            
+            // 1. Instantly write banned: true to the user's Firestore document
+            const userDocRef = doc(db, "users", currentUserDetails.uid);
+            try {
+                await setDoc(userDocRef, { banned: true }, { merge: true });
+            } catch (err) {
+                console.error("Failed to flag ban state in Firestore:", err);
+            }
+            
+            // 2. Trigger the ban lock overlay
+            triggerBanScreen();
+            return true;
+        }
+        return false;
+    }
+
+    function triggerBanScreen() {
+        try {
+            window.speechSynthesis.cancel();
+            stopActiveQueryCapture();
+            stopPassiveWakeListener();
+        } catch(e) {}
+        
+        document.body.innerHTML = `
+            <div class="fixed inset-0 z-[99999] bg-[#020202] flex flex-col items-center justify-center text-center p-8 space-y-6 select-none font-pixel">
+                <div class="w-20 h-20 rounded-full border border-rose-500/20 bg-rose-500/10 flex items-center justify-center text-rose-500 animate-pulse shadow-lg shadow-rose-500/10">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-10 h-10">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m0-10.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.75c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.57-.598-3.75h-.152c-3.196 0-6.1-1.249-8.25-3.286zm0 13.036h.008v.008H12v-.008z" />
+                    </svg>
+                </div>
+                <h1 class="text-md text-rose-500 uppercase tracking-widest">Access Denied</h1>
+                <p class="text-[10px] text-slate-400 max-w-sm leading-relaxed font-sans uppercase">
+                    Your account has been permanently restricted from accessing the KHIT campus AI system for violating our safety guidelines (inappropriate/sexually explicit search query detected).
+                </p>
+                <div class="text-[8px] text-slate-700 tracking-widest mt-4">Security Incident Code: 403-SAF</div>
+            </div>
+        `;
     }
 
     if (btnPrevMonth) {
