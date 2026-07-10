@@ -692,21 +692,21 @@ Student Supervision: A designated Faculty Advisor oversees student course regist
     if (btnMobileSidebar && sidebar) {
         btnMobileSidebar.addEventListener("click", (e) => {
             e.stopPropagation();
-            sidebar.classList.toggle("hidden");
+            sidebar.classList.toggle("sidebar-open");
         });
     }
 
     if (btnMobileSidebarClose && sidebar) {
         btnMobileSidebarClose.addEventListener("click", () => {
-            sidebar.classList.add("hidden");
+            sidebar.classList.remove("sidebar-open");
         });
     }
 
     const mainElement = document.querySelector("main");
     if (mainElement && sidebar) {
         mainElement.addEventListener("click", () => {
-            if (window.innerWidth < 768 && !sidebar.classList.contains("hidden")) {
-                sidebar.classList.add("hidden");
+            if (window.innerWidth < 768 && sidebar.classList.contains("sidebar-open")) {
+                sidebar.classList.remove("sidebar-open");
             }
         });
     }
@@ -775,7 +775,7 @@ Student Supervision: A designated Faculty Advisor oversees student course regist
                         if (inputQuery) inputQuery.value = queryStr;
                         submitAcademicQuery(queryStr);
                         if (window.innerWidth < 768 && sidebar) {
-                            sidebar.classList.add("hidden");
+                            sidebar.classList.remove("sidebar-open");
                         }
                     });
                     circularsList.appendChild(item);
