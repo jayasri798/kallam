@@ -105,6 +105,9 @@ function initializeApplication() {
     let btnMobileSidebar;
     try { btnMobileSidebar = document.getElementById("btn-mobile-sidebar"); } catch (e) { console.warn("Selector error 'btn-mobile-sidebar':", e); }
     
+    let btnMobileSidebarClose;
+    try { btnMobileSidebarClose = document.getElementById("btn-mobile-sidebar-close"); } catch (e) { console.warn("Selector error 'btn-mobile-sidebar-close':", e); }
+    
     let circularsList;
     try { circularsList = document.getElementById("circulars-list"); } catch (e) { console.warn("Selector error 'circulars-list':", e); }
     
@@ -687,8 +690,24 @@ Student Supervision: A designated Faculty Advisor oversees student course regist
     }
     
     if (btnMobileSidebar && sidebar) {
-        btnMobileSidebar.addEventListener("click", () => {
+        btnMobileSidebar.addEventListener("click", (e) => {
+            e.stopPropagation();
             sidebar.classList.toggle("hidden");
+        });
+    }
+
+    if (btnMobileSidebarClose && sidebar) {
+        btnMobileSidebarClose.addEventListener("click", () => {
+            sidebar.classList.add("hidden");
+        });
+    }
+
+    const mainElement = document.querySelector("main");
+    if (mainElement && sidebar) {
+        mainElement.addEventListener("click", () => {
+            if (window.innerWidth < 768 && !sidebar.classList.contains("hidden")) {
+                sidebar.classList.add("hidden");
+            }
         });
     }
 
@@ -755,6 +774,9 @@ Student Supervision: A designated Faculty Advisor oversees student course regist
                         const queryStr = `Details on ${log.title}`;
                         if (inputQuery) inputQuery.value = queryStr;
                         submitAcademicQuery(queryStr);
+                        if (window.innerWidth < 768 && sidebar) {
+                            sidebar.classList.add("hidden");
+                        }
                     });
                     circularsList.appendChild(item);
                 });
