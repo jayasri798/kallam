@@ -803,6 +803,13 @@ html, body {
     #sidebar.sidebar-open {
         transform: translateX(0) !important;
     }
+    .calendar-grid {
+        gap: 0.25rem !important;
+    }
+    .calendar-day-cell {
+        padding: 0.3rem !important;
+        border-radius: 0.45rem !important;
+    }
 }
 
 
