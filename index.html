@@ -12,8 +12,22 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <!-- Custom Style Sheet -->
-    <link rel="stylesheet" href="styles.css?v=2.1.6">
+    <link rel="stylesheet" href="styles.css?v=2.1.7">
     <style>
+        /* Framework-independent layout rules for full-screen sizing */
+        #app-container:not(.hidden) {
+            width: 100vw !important;
+            height: 100vh !important;
+            display: flex !important;
+            overflow: hidden !important;
+        }
+        main {
+            flex: 1 1 0% !important;
+            min-width: 0 !important;
+            display: flex !important;
+            flex-direction: column !important;
+        }
+
         /* Mobile-First Responsive Drawer and Calendar Grid Overrides */
         @media (max-w: 768px) {
             #sidebar {
@@ -546,6 +560,6 @@
     </div>
 
     <!-- Application Script -->
-    <script type="module" src="app.js?v=2.1.6"></script>
+    <script type="module" src="app.js?v=2.1.7"></script>
 </body>
 </html>
