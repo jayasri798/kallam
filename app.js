@@ -713,20 +713,30 @@ Student Supervision: A designated Faculty Advisor oversees student course regist
 
     // --- Circular Data Streaming ---
     let activeCircularsList = []; // Track active circulars in memory for calendar queries
+    let deletedTemplateIds = []; // Track locally deleted template notices
 
     function subscribeToCirculars() {
         const circCollection = collection(db, "circulars");
         onSnapshot(circCollection, (snapshot) => {
             const logs = [];
             snapshot.forEach(doc => logs.push(doc.data()));
-            logs.sort((a,b) => b.timestamp - a.timestamp);
-            activeCircularsList = logs;
-            renderCircularLogs(logs);
+            
+            // Merge templates that aren't already present in Firestore logs
+            const merged = [...logs];
+            defaultCirculars.forEach(temp => {
+                if (!deletedTemplateIds.includes(temp.id) && !logs.some(log => log.id === temp.id || log.title === temp.title)) {
+                    merged.push(temp);
+                }
+            });
+
+            merged.sort((a,b) => b.timestamp - a.timestamp);
+            activeCircularsList = merged;
+            renderCircularLogs(merged);
             renderInteractiveCalendar(); // Rebuild calendar dots
         }, (error) => {
             console.error("Firestore sync error:", error);
-            activeCircularsList = defaultCirculars;
-            loadSimulatedCirculars(); 
+            activeCircularsList = defaultCirculars.filter(temp => !deletedTemplateIds.includes(temp.id));
+            renderCircularLogs(activeCircularsList); 
             renderInteractiveCalendar();
         });
     }
@@ -835,6 +845,7 @@ Student Supervision: A designated Faculty Advisor oversees student course regist
                             } catch (err) {
                                 console.warn("uploaded_circulars delete skipped:", err);
                             }
+                            deletedTemplateIds.push(docId);
                             showToast("Notice deleted successfully.");
                         } catch (err) {
                             console.error("Delete notice failed:", err);
