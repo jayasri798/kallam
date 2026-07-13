@@ -662,7 +662,6 @@ Student Supervision: A designated Faculty Advisor oversees student course regist
         if (adminWorkspace) adminWorkspace.classList.add("hidden");
         if (chatWorkspace) chatWorkspace.classList.remove("hidden");
         if (btnAdminToggle) {
-            btnAdminToggle.textContent = "Admin Console";
             btnAdminToggle.classList.add("hidden");
         }
         resetAdminForm();
