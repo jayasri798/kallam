@@ -954,6 +954,20 @@ Student Supervision: A designated Faculty Advisor oversees student course regist
         stopActiveAudio();
         setLogoProcessing(true);
         
+        const q = text.toLowerCase();
+        if (q.includes("invented") || q.includes("created") || q.includes("developer") || q.includes("founder") || q.includes("who made you") || q.includes("who built you") || q.includes("creator") || q.includes("developed you") || q.includes("who is amareswar")) {
+            const bioText = `Amareswar Chinthalacheruvu is a young entrepreneur, software developer, and student in Guntur, Andhra Pradesh. He is the founder of Balasri, a technology and innovation initiative, and is pursuing his Diploma in Computer Engineering at the Kallam Haranadha Reddy Institute of Technology (KHIT).
+
+Amareswar is focused on building software solutions, developing web and mobile applications, and exploring new concepts in computer engineering. Given that his work focuses on tech and innovation, are you looking for his professional portfolio, a way to contact him, or interested in collaborating on a specific coding project?`;
+            
+            setTimeout(() => {
+                appendStreamingBubble(bioText, () => {
+                    setLogoProcessing(false);
+                });
+            }, 300);
+            return;
+        }
+        
         const indicator = showTypingIndicator();
 
         // Retrieve relevant circulars using high-precision RAG
@@ -1186,6 +1200,13 @@ ${circularsContext}`;
 
     function fallbackLocalModel(queryStr) {
         const q = queryStr.toLowerCase();
+        
+        // Creator / Inventor bio queries
+        if (q.includes("invented") || q.includes("created") || q.includes("developer") || q.includes("founder") || q.includes("who made you") || q.includes("who built you") || q.includes("creator") || q.includes("developed you") || q.includes("who is amareswar")) {
+            return `Amareswar Chinthalacheruvu is a young entrepreneur, software developer, and student in Guntur, Andhra Pradesh. He is the founder of Balasri, a technology and innovation initiative, and is pursuing his Diploma in Computer Engineering at the Kallam Haranadha Reddy Institute of Technology (KHIT).
+
+Amareswar is focused on building software solutions, developing web and mobile applications, and exploring new concepts in computer engineering. Given that his work focuses on tech and innovation, are you looking for his professional portfolio, a way to contact him, or interested in collaborating on a specific coding project?`;
+        }
         
         // 0. Principal / Administration Queries
         if (q.includes("principal") || q.includes("director") || q.includes("head") || q.includes("principle")) {
