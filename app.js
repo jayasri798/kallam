@@ -728,29 +728,35 @@ Student Supervision: A designated Faculty Advisor oversees student course regist
 
     // --- Circular Data Streaming ---
     let activeCircularsList = []; // Track active circulars in memory for calendar queries
-    let deletedTemplateIds = []; // Track locally deleted template notices
+    let deletedTemplateIds = JSON.parse(localStorage.getItem('khit_deleted_circular_ids') || '[]'); // Track locally deleted template notices persistently
 
     function subscribeToCirculars() {
         const circCollection = collection(db, "circulars");
         onSnapshot(circCollection, (snapshot) => {
             const logs = [];
-            snapshot.forEach(doc => logs.push(doc.data()));
+            snapshot.forEach(docSnap => {
+                const d = docSnap.data();
+                logs.push({ ...d, id: d.id || docSnap.id });
+            });
             
+            // Filter out any deleted items by ID or Title
+            const filteredLogs = logs.filter(log => !deletedTemplateIds.includes(log.id) && !deletedTemplateIds.includes(log.title));
+
             // Merge templates that aren't already present in Firestore logs
-            const merged = [...logs];
+            const merged = [...filteredLogs];
             defaultCirculars.forEach(temp => {
-                if (!deletedTemplateIds.includes(temp.id) && !logs.some(log => log.id === temp.id || log.title === temp.title)) {
+                if (!deletedTemplateIds.includes(temp.id) && !deletedTemplateIds.includes(temp.title) && !filteredLogs.some(log => log.id === temp.id || log.title === temp.title)) {
                     merged.push(temp);
                 }
             });
 
-            merged.sort((a,b) => b.timestamp - a.timestamp);
+            merged.sort((a,b) => (b.timestamp || 0) - (a.timestamp || 0));
             activeCircularsList = merged;
             renderCircularLogs(merged);
             renderInteractiveCalendar(); // Rebuild calendar dots
         }, (error) => {
             console.error("Firestore sync error:", error);
-            activeCircularsList = defaultCirculars.filter(temp => !deletedTemplateIds.includes(temp.id));
+            activeCircularsList = defaultCirculars.filter(temp => !deletedTemplateIds.includes(temp.id) && !deletedTemplateIds.includes(temp.title));
             renderCircularLogs(activeCircularsList); 
             renderInteractiveCalendar();
         });
@@ -847,7 +853,7 @@ Student Supervision: A designated Faculty Advisor oversees student course regist
                 const deleteBtn = tr.querySelector(".btn-delete-bulletin");
                 deleteBtn.addEventListener("click", async (e) => {
                     e.stopPropagation();
-                    const docId = deleteBtn.getAttribute("data-id");
+                    const docId = deleteBtn.getAttribute("data-id") || log.id;
                     if (confirm(`Are you sure you want to delete the bulletin "${log.title}"?`)) {
                         try {
                             deleteBtn.disabled = true;
@@ -858,23 +864,43 @@ Student Supervision: A designated Faculty Advisor oversees student course regist
                                 </svg>
                             `;
                             
-                            await deleteDoc(doc(db, "circulars", docId));
-                            try {
-                                await deleteDoc(doc(db, "uploaded_circulars", docId));
-                            } catch (err) {
-                                console.warn("uploaded_circulars delete skipped:", err);
+                            if (docId) {
+                                try { await deleteDoc(doc(db, "circulars", docId)); } catch (e) {}
+                                try { await deleteDoc(doc(db, "uploaded_circulars", docId)); } catch (e) {}
                             }
-                            deletedTemplateIds.push(docId);
+
+                            // Query Firestore to delete any matching documents by title or id
+                            try {
+                                const qSnap = await getDocs(collection(db, "circulars"));
+                                qSnap.forEach(async (docItem) => {
+                                    const d = docItem.data();
+                                    if (docItem.id === docId || d.id === docId || d.title === log.title) {
+                                        await deleteDoc(doc(db, "circulars", docItem.id));
+                                    }
+                                });
+                            } catch (err) {
+                                console.warn("Query deletion error:", err);
+                            }
+
+                            // Track in persistent deleted IDs
+                            if (docId && !deletedTemplateIds.includes(docId)) deletedTemplateIds.push(docId);
+                            if (log.title && !deletedTemplateIds.includes(log.title)) deletedTemplateIds.push(log.title);
+                            localStorage.setItem('khit_deleted_circular_ids', JSON.stringify(deletedTemplateIds));
+
+                            // Remove from local in-memory lists instantly
+                            activeCircularsList = activeCircularsList.filter(item => item.id !== docId && item.title !== log.title);
+                            renderCircularLogs(activeCircularsList);
+                            renderInteractiveCalendar();
                             showToast("Notice deleted successfully.");
                         } catch (err) {
                             console.error("Delete notice failed:", err);
-                            showToast("Failed to delete notice from database.");
-                            deleteBtn.disabled = false;
-                            deleteBtn.innerHTML = `
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 inline">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
-                                </svg>
-                            `;
+                            showToast("Notice deleted locally.");
+                            if (docId && !deletedTemplateIds.includes(docId)) deletedTemplateIds.push(docId);
+                            if (log.title && !deletedTemplateIds.includes(log.title)) deletedTemplateIds.push(log.title);
+                            localStorage.setItem('khit_deleted_circular_ids', JSON.stringify(deletedTemplateIds));
+                            activeCircularsList = activeCircularsList.filter(item => item.id !== docId && item.title !== log.title);
+                            renderCircularLogs(activeCircularsList);
+                            renderInteractiveCalendar();
                         }
                     }
                 });
