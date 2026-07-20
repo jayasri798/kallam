@@ -984,6 +984,29 @@ Student Supervision: A designated Faculty Advisor oversees student course regist
         return matches.slice(0, 5); // Return top 5 matches
     }
 
+    // 1. Strict Keyword White-List Validation Engine
+    function validateQueryRelevance(userQuery) {
+        const serializedInput = userQuery.toLowerCase().trim();
+        
+        // Explicit academic, branch, technical, and institutional topics
+        const allowedKeywords = [
+            'diploma', 'polytechnic', 'btech', 'placement', 'exam', 'circular', 
+            'notice', 'syllabus', 'admission', 'fee', 'results', 'timetable', 
+            'principal', 'khit', 'college', 'code', 'java', 'python', 'c++', 
+            'course', 'class', 'gate', 'mid', 'labs', 'department', 'founder',
+            'amareswar', 'balasri', 'hostel', 'canteen', 'sports', 'faculty',
+            'events', 'fest', 'branch', 'cse', 'ece', 'eee', 'mech', 'civil',
+            'it', 'ai', 'ml', 'mca', 'mba', 'mtech', 'who invented you',
+            'who created you', 'who developed you', 'who made you', 'who built you',
+            'who is your creator', 'who is your founder', 'who is amareswar',
+            'address', 'location', 'phone', 'contact', 'jntu', 'naac',
+            'hi', 'hello', 'hey', 'help', 'good morning', 'good evening', 'thanks', 'thank you'
+        ];
+
+        // Evaluates if the query is structurally relevant to the college domain
+        return allowedKeywords.some(keyword => serializedInput.includes(keyword));
+    }
+
     async function submitAcademicQuery(text) {
         if (!text) return;
         const isBanned = await checkAndEnforceBan(text);
@@ -1015,6 +1038,20 @@ Amareswar is focused on building software solutions, developing web and mobile a
         }
         
         const indicator = showTypingIndicator();
+
+        // 2. Strict Off-Topic Guardrail Check
+        const isQueryValid = validateQueryRelevance(text);
+        if (!isQueryValid) {
+            const offTopicResponse = "I don't have any details specific to what you have asked. Please ask a campus-related or academic query.";
+            setTimeout(() => {
+                removeTypingIndicator(indicator);
+                appendStreamingBubble(offTopicResponse, () => {
+                    setLogoProcessing(false);
+                    if (voiceModeOverlayActive) vocalizeResponse(offTopicResponse);
+                });
+            }, 300);
+            return;
+        }
 
         // Retrieve relevant circulars using high-precision RAG
         const retrievedCirculars = getRelevantCircularsForQuery(text);
@@ -1194,7 +1231,7 @@ ${circularsContext}`;
                 parts: [{ text: systemInstruction }]
             },
             generationConfig: {
-                temperature: 0.2
+                temperature: 0.1
             },
             tools: [{
                 googleSearch: {}
