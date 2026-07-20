@@ -756,6 +756,9 @@ Student Supervision: A designated Faculty Advisor oversees student course regist
     }
 
     function renderCircularLogs(logs) {
+        const statTotal = document.getElementById("stat-total-bulletins");
+        if (statTotal) statTotal.textContent = activeCircularsList.length;
+
         if (circularsList) {
             circularsList.innerHTML = "";
             if (logs.length === 0) {
@@ -2143,11 +2146,33 @@ function solve(input) {
         if (adminForm) adminForm.reset();
         selectedFile = null;
         if (uploadStatusText) {
-            uploadStatusText.innerHTML = `Drag & drop notice document here, or <span class="text-blue-400 font-bold hover:underline">browse</span>`;
+            uploadStatusText.innerHTML = `Drag & drop notice document here, or <span class="text-[#38bdf8] font-bold hover:underline">browse</span>`;
         }
+        const textContentInput = document.getElementById("notice-text-content");
+        if (textContentInput) textContentInput.value = "";
+        const urgentInput = document.getElementById("notice-urgent-toggle");
+        if (urgentInput) urgentInput.checked = false;
         if (progressBarContainer) progressBarContainer.classList.add("hidden");
         if (progressBarFill) progressBarFill.style.width = "0%";
         if (progressPercent) progressPercent.textContent = "0%";
+    }
+
+    // Real-Time Table Search Filter
+    const adminSearchInput = document.getElementById("admin-search-bulletin");
+    if (adminSearchInput) {
+        adminSearchInput.addEventListener("input", (e) => {
+            const query = e.target.value.toLowerCase().trim();
+            if (!query) {
+                renderCircularLogs(activeCircularsList);
+            } else {
+                const filtered = activeCircularsList.filter(log => 
+                    (log.title && log.title.toLowerCase().includes(query)) ||
+                    (log.category && log.category.toLowerCase().includes(query)) ||
+                    (log.summary && log.summary.toLowerCase().includes(query))
+                );
+                renderCircularLogs(filtered);
+            }
+        });
     }
 
     if (dragDropZone) {
@@ -2199,7 +2224,7 @@ function solve(input) {
             showToast("Invalid file type! Please upload .txt, .pdf, or image files (.png, .jpg, .jpeg).");
             selectedFile = null;
             if (uploadStatusText) {
-                uploadStatusText.innerHTML = `Drag & drop notice document here, or <span class="text-[#5aa2fa] font-bold hover:underline">browse</span>`;
+                uploadStatusText.innerHTML = `Drag & drop notice document here, or <span class="text-[#38bdf8] font-bold hover:underline">browse</span>`;
             }
             return;
         }
@@ -2215,13 +2240,16 @@ function solve(input) {
             e.preventDefault();
             
             const title = noticeTitleInput ? noticeTitleInput.value.trim() : "";
+            const textContentInput = document.getElementById("notice-text-content");
+            const manualText = textContentInput ? textContentInput.value.trim() : "";
+
             if (!title) {
                 showToast("Please enter a notice title.");
                 return;
             }
 
-            if (!selectedFile) {
-                showToast("Please select a file to upload.");
+            if (!selectedFile && !manualText) {
+                showToast("Please select a file or enter notice description text.");
                 return;
             }
 
@@ -2347,37 +2375,51 @@ Ensure the output is ONLY a valid JSON object, without any markdown code blocks,
         const dateOptions = { month: 'long', day: 'numeric', year: 'numeric' };
         const formattedDate = new Date().toLocaleDateString('en-US', dateOptions);
         
+        const catInput = document.getElementById("notice-category");
+        const urgentInput = document.getElementById("notice-urgent-toggle");
+        const textContentInput = document.getElementById("notice-text-content");
+
+        const selectedCategory = catInput ? catInput.value : "Academic";
+        const isUrgent = urgentInput ? urgentInput.checked : false;
+        const manualText = textContentInput ? textContentInput.value.trim() : "";
+
+        const fileName = file ? file.name : "Direct Notice";
+        const defaultSummary = manualText ? (manualText.length > 140 ? manualText.substring(0, 140) + "..." : manualText) : `Official document notice (${fileName}) uploaded by Administrator.`;
+        const defaultFullText = manualText || `Notice details from file: ${fileName}.`;
+
         let circularData = {
             id: id,
             title: title,
-            category: "Official",
+            category: selectedCategory,
             date: formattedDate,
-            summary: `Official document notice (${file.name}) uploaded by Administrator.`,
-            fullText: `Notice details from file: ${file.name}.`,
-            urgent: true,
+            summary: defaultSummary,
+            fullText: defaultFullText,
+            urgent: isUrgent,
             timestamp: Date.now()
         };
         
-        try {
-            console.log("Running AI analysis / OCR on uploaded file...");
-            const aiResult = await analyzeCircularFile(file, title);
-            if (aiResult) {
-                circularData.title = aiResult.title || circularData.title;
-                circularData.date = aiResult.date || circularData.date;
-                circularData.category = aiResult.category || circularData.category;
-                circularData.summary = aiResult.summary || circularData.summary;
-                circularData.fullText = aiResult.fullText || aiResult.summary;
-            }
-            console.log("AI analysis successful. Ingesting structured data:", circularData);
-        } catch (aiErr) {
-            console.warn("AI circular analysis failed, falling back to default metadata:", aiErr);
-            showToast("Warning: AI analysis failed. Check Google Cloud restrictions.");
-            if (file.name.endsWith(".txt")) {
-                try {
-                    const txt = await readFileAsText(file);
-                    circularData.fullText = txt;
-                    circularData.summary = txt.substring(0, 150) + "...";
-                } catch(e) {}
+        if (file) {
+            try {
+                console.log("Running AI analysis / OCR on uploaded file...");
+                const aiResult = await analyzeCircularFile(file, title);
+                if (aiResult) {
+                    circularData.title = aiResult.title || circularData.title;
+                    circularData.date = aiResult.date || circularData.date;
+                    circularData.category = selectedCategory || aiResult.category || circularData.category;
+                    circularData.summary = aiResult.summary || circularData.summary;
+                    circularData.fullText = manualText || aiResult.fullText || aiResult.summary;
+                }
+                console.log("AI analysis successful. Ingesting structured data:", circularData);
+            } catch (aiErr) {
+                console.warn("AI circular analysis failed, falling back to default metadata:", aiErr);
+                showToast("Warning: AI analysis failed. Check Google Cloud restrictions.");
+                if (file.name.endsWith(".txt")) {
+                    try {
+                        const txt = await readFileAsText(file);
+                        circularData.fullText = txt;
+                        circularData.summary = txt.substring(0, 150) + "...";
+                    } catch(e) {}
+                }
             }
         }
 

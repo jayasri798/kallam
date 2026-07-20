@@ -12,7 +12,7 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <!-- Custom Style Sheet -->
-    <link rel="stylesheet" href="styles.css?v=2.2.6">
+    <link rel="stylesheet" href="styles.css?v=2.3.0">
     <style>
         /* Framework-independent layout rules for full-screen sizing */
         #app-container:not(.hidden) {
@@ -427,21 +427,146 @@
             </div>
 
             <!-- Admin Workspace Section (Completely hidden by default) -->
-            <div id="admin-workspace" class="flex-1 overflow-y-auto p-6 md:p-10 hidden flex flex-col items-center justify-start gap-8 pb-16">
+            <div id="admin-workspace" class="flex-1 overflow-y-auto p-4 md:p-8 hidden flex flex-col items-center justify-start gap-8 pb-16 w-full max-w-5xl mx-auto">
+                
+                <!-- Admin Header & Real-Time Analytics Cards Grid -->
+                <div class="w-full space-y-4">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-900/80 pb-4">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="px-2.5 py-0.5 rounded-full bg-sky-500/10 border border-sky-400/30 text-[9px] font-pixel uppercase tracking-widest text-[#38bdf8]">
+                                    Root Control Panel
+                                </span>
+                                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                            </div>
+                            <h1 class="text-xl md:text-2xl font-pixel text-white uppercase mt-1">Campus Administration Console</h1>
+                            <p class="text-xs text-slate-400 font-medium">Manage RAG database circulars, AI knowledge indices, and real-time student notifications.</p>
+                        </div>
+                    </div>
+
+                    <!-- 4-Card Analytics Grid -->
+                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 font-grotesk">
+                        <!-- Stat Card 1 -->
+                        <div class="p-4 rounded-2xl border border-slate-900 bg-slate-950/40 flex flex-col justify-between space-y-2 framer-neon-card relative overflow-hidden">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Active Bulletins</span>
+                                <div class="w-7 h-7 rounded-xl bg-sky-500/10 border border-sky-400/20 flex items-center justify-center text-[#38bdf8]">
+                                    📋
+                                </div>
+                            </div>
+                            <div>
+                                <span id="stat-total-bulletins" class="text-2xl font-pixel font-bold text-white">0</span>
+                                <p class="text-[10px] text-emerald-400 flex items-center gap-1 mt-0.5">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Live RAG Indexed
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Stat Card 2 -->
+                        <div class="p-4 rounded-2xl border border-slate-900 bg-slate-950/40 flex flex-col justify-between space-y-2 framer-neon-card relative overflow-hidden">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Database Sync</span>
+                                <div class="w-7 h-7 rounded-xl bg-emerald-500/10 border border-emerald-400/20 flex items-center justify-center text-emerald-400">
+                                    ⚡
+                                </div>
+                            </div>
+                            <div>
+                                <span class="text-xs font-pixel font-bold text-slate-200 uppercase">Firestore Active</span>
+                                <p class="text-[10px] text-slate-400 mt-0.5">Real-time Stream Engine</p>
+                            </div>
+                        </div>
+
+                        <!-- Stat Card 3 -->
+                        <div class="p-4 rounded-2xl border border-slate-900 bg-slate-950/40 flex flex-col justify-between space-y-2 framer-neon-card relative overflow-hidden">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">AI Model</span>
+                                <div class="w-7 h-7 rounded-xl bg-purple-500/10 border border-purple-400/20 flex items-center justify-center text-purple-400">
+                                    ✨
+                                </div>
+                            </div>
+                            <div>
+                                <span class="text-xs font-pixel font-bold text-purple-300 uppercase">Gemini 2.5 Flash</span>
+                                <p class="text-[10px] text-slate-400 mt-0.5">Multimodal OCR Enabled</p>
+                            </div>
+                        </div>
+
+                        <!-- Stat Card 4 -->
+                        <div class="p-4 rounded-2xl border border-slate-900 bg-slate-950/40 flex flex-col justify-between space-y-2 framer-neon-card relative overflow-hidden">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Access Scope</span>
+                                <div class="w-7 h-7 rounded-xl bg-blue-500/10 border border-blue-400/20 flex items-center justify-center text-blue-400">
+                                    🛡️
+                                </div>
+                            </div>
+                            <div>
+                                <span class="text-xs font-pixel font-bold text-blue-300 uppercase">Administrator</span>
+                                <p class="text-[10px] text-slate-400 mt-0.5">Full System Privileges</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Publish Bulletin Card -->
-                <div class="max-w-4xl w-full framer-neon-card p-8 space-y-6 relative">
+                <div class="w-full framer-neon-card p-6 md:p-8 space-y-6 relative">
                     <div class="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#38bdf8] to-transparent"></div>
                     
-                    <div class="text-center space-y-1">
-                        <h2 class="text-md font-pixel text-white uppercase">Admin Bulletin Manager</h2>
-                        <p class="text-xs text-slate-400 font-medium">Publish official academic document circular logs to the campus engine.</p>
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-slate-800/80 pb-4">
+                        <div>
+                            <h2 class="text-md font-pixel text-white uppercase flex items-center gap-2">
+                                <span>Publish New Bulletin</span>
+                                <span class="text-[9px] px-2 py-0.5 rounded bg-sky-500/10 border border-sky-400/20 text-sky-400 font-pixel">RAG Indexer</span>
+                            </h2>
+                            <p class="text-xs text-slate-400 font-medium">Publish official academic document circular logs or manual notices to the campus engine.</p>
+                        </div>
                     </div>
 
                     <form id="admin-upload-form" class="space-y-5">
-                        <!-- Notice Title Input -->
+                        <!-- Grid Layout for Inputs -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <!-- Notice Title Input -->
+                            <div class="md:col-span-2 space-y-2">
+                                <label for="notice-title" class="text-[9px] font-pixel uppercase text-slate-400 tracking-wider flex items-center justify-between">
+                                    <span>Notice Title</span>
+                                    <span class="text-rose-400">*Required</span>
+                                </label>
+                                <input type="text" id="notice-title" placeholder="e.g. B.Tech Semester End Exams Schedule & Guidelines" class="w-full bg-slate-950/80 border border-slate-800/80 rounded-xl px-4 py-3 text-xs md:text-sm focus:outline-none focus:border-[#38bdf8]/80 text-slate-200 placeholder:text-slate-700 transition font-medium" required>
+                            </div>
+
+                            <!-- Category Selection -->
+                            <div class="space-y-2">
+                                <label for="notice-category" class="text-[9px] font-pixel uppercase text-slate-400 tracking-wider">Category</label>
+                                <select id="notice-category" class="w-full bg-slate-950/80 border border-slate-800/80 rounded-xl px-4 py-3 text-xs md:text-sm focus:outline-none focus:border-[#38bdf8]/80 text-slate-200 transition font-medium cursor-pointer">
+                                    <option value="Academic">Academic Notice</option>
+                                    <option value="Exams">Exams & Schedules</option>
+                                    <option value="Placements">Placements & Hiring</option>
+                                    <option value="Hostel">Hostel & Facilities</option>
+                                    <option value="Events">Events & Workshops</option>
+                                    <option value="Urgent">Urgent Announcement</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Urgent Priority Toggle & Target Audience Filter Row -->
+                        <div class="flex flex-wrap items-center justify-between gap-4 p-4 rounded-xl border border-slate-800/80 bg-slate-950/30">
+                            <!-- Urgent Flag Switch -->
+                            <label class="flex items-center gap-3 cursor-pointer select-none">
+                                <input type="checkbox" id="notice-urgent-toggle" class="sr-only peer">
+                                <div class="w-9 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-rose-500 relative"></div>
+                                <span class="text-xs font-semibold text-slate-300">Mark as <span class="text-rose-400 font-bold uppercase">Urgent Priority</span></span>
+                            </label>
+
+                            <div class="text-[10px] text-slate-400 italic">
+                                Urgent notices feature a red highlight badge across student calendars.
+                            </div>
+                        </div>
+
+                        <!-- Manual Text Content (Optional) -->
                         <div class="space-y-2">
-                            <label for="notice-title" class="text-[9px] font-pixel uppercase text-slate-400 tracking-wider">Notice Title</label>
-                            <input type="text" id="notice-title" placeholder="e.g. B.Tech Semester End Exams Schedule" class="w-full bg-slate-950/80 border border-slate-800/80 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#38bdf8]/80 text-slate-200 placeholder:text-slate-700 transition font-medium" required>
+                            <label for="notice-text-content" class="text-[9px] font-pixel uppercase text-slate-400 tracking-wider flex items-center justify-between">
+                                <span>Notice Body / Description (Optional)</span>
+                                <span class="text-slate-500">Auto-extracted if file attached</span>
+                            </label>
+                            <textarea id="notice-text-content" rows="3" placeholder="Enter detailed notice content or instructions directly here if no document file is attached..." class="w-full bg-slate-950/80 border border-slate-800/80 rounded-xl p-4 text-xs focus:outline-none focus:border-[#38bdf8]/80 text-slate-200 placeholder:text-slate-700 transition font-medium resize-none"></textarea>
                         </div>
 
                         <!-- Drag and Drop File Upload Container -->
@@ -461,7 +586,7 @@
                         <!-- Smooth Loading Progress Bar Widget -->
                         <div id="progress-bar-container" class="space-y-2 hidden">
                             <div class="flex items-center justify-between text-[10px] font-semibold text-slate-400">
-                                <span>Uploading Notice...</span>
+                                <span>Uploading Notice & Analyzing RAG Embeddings...</span>
                                 <span id="progress-percent">0%</span>
                             </div>
                             <div class="w-full bg-slate-950 h-2.5 rounded-full overflow-hidden border border-slate-800/60 p-0.5">
@@ -482,13 +607,23 @@
                 </div>
 
                 <!-- Manage Circular Bulletins Card -->
-                <div class="max-w-4xl w-full framer-neon-card p-8 space-y-6 relative">
+                <div class="w-full framer-neon-card p-6 md:p-8 space-y-6 relative">
                     <div class="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#38bdf8] to-transparent"></div>
                     
-                    <div class="flex items-center justify-between">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800/80 pb-4">
                         <div>
                             <h2 class="text-md font-pixel text-white uppercase">Manage Circular Bulletins</h2>
                             <p class="text-xs text-slate-400 font-medium">Delete outdated or incorrect notices from the active campus index in real-time.</p>
+                        </div>
+
+                        <!-- Search & Filter Controls -->
+                        <div class="flex items-center gap-3">
+                            <div class="relative w-full md:w-64">
+                                <input type="text" id="admin-search-bulletin" placeholder="Search bulletins..." class="w-full bg-slate-950/80 border border-slate-800/80 rounded-xl pl-9 pr-4 py-2 text-xs focus:outline-none focus:border-[#38bdf8]/80 text-slate-200 placeholder:text-slate-600 transition">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5 text-slate-500 absolute left-3 top-2.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                                </svg>
+                            </div>
                         </div>
                     </div>
                     
@@ -512,7 +647,38 @@
                         </table>
                     </div>
                 </div>
+
+                <!-- Knowledge Inspector Card -->
+                <div class="w-full framer-neon-card p-6 md:p-8 space-y-4 relative">
+                    <div class="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#8b5cf6] to-transparent"></div>
+                    
+                    <div class="flex items-center justify-between border-b border-slate-800/80 pb-3">
+                        <div class="flex items-center gap-2">
+                            <span class="text-md font-pixel text-purple-300 uppercase">RAG Knowledge Base Inspector</span>
+                        </div>
+                        <span class="text-[9px] font-pixel uppercase text-purple-400 px-2 py-0.5 rounded bg-purple-950/60 border border-purple-500/30">System Prompt Context</span>
+                    </div>
+
+                    <p class="text-xs text-slate-400">Below is the core permanent knowledge index loaded into the AI model alongside active Firestore notices:</p>
+                    
+                    <div class="p-4 rounded-xl bg-slate-950 border border-slate-900 font-mono text-[11px] text-slate-400 max-h-48 overflow-y-auto leading-relaxed whitespace-pre-wrap">
+                        [COLLEGE IDENTITY]
+                        Kallam Haranadhareddy Institute of Technology (KHIT) | Principal: Dr. B. S. B. Reddy | Est. 2010 | NAAC 'A' Grade | JNTUK Affiliated | Location: Guntur, AP | Contact: +91-9885604528
+
+                        [ACADEMICS & INTAKE]
+                        CSE: 540 | CSE AI-ML: 360 | ECE: 180 | IT: 180 | EEE: 60 | Civil: 30 | Mechanical: 30 | Polytechnic Diploma: 360 | PG: MBA, MCA, M.Tech
+
+                        [PLACEMENTS]
+                        Placement Rate: 60%-80% | Highest Package: 12 LPA (Peak up to 22 LPA) | Average: 3.5 - 5.5 LPA | Partners: TCS, Wipro, Infosys, Capgemini, HCL, Tech Mahindra, Amaron
+
+                        [HOSTEL & AMENITIES]
+                        Boys Hostel: ~67,500 INR/yr | Girls Hostel: 75,000-85,000 INR/yr | Meals: 4 daily | Gym: 300 sq.m indoor facility
+                    </div>
+                </div>
+
             </div>
+        </main>
+    </div>
         </main>
     </div>
 
@@ -574,6 +740,6 @@
     </div>
 
     <!-- Application Script -->
-    <script type="module" src="app.js?v=2.2.6"></script>
+    <script type="module" src="app.js?v=2.3.0"></script>
 </body>
 </html>
