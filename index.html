@@ -12,7 +12,7 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <!-- Custom Style Sheet -->
-    <link rel="stylesheet" href="styles.css?v=2.5.0">
+    <link rel="stylesheet" href="styles.css?v=2.5.1">
     <style>
         /* Framework-independent layout rules for full-screen sizing */
         #app-container:not(.hidden) {
@@ -698,22 +698,22 @@
     </div>
 
     <!-- Full-Viewport Voice Mode Overlay (Completely hidden by default) -->
-    <div id="voice-overlay" class="fixed inset-0 z-50 bg-[#020203] flex flex-col items-center justify-center hidden opacity-0 transition-opacity duration-300">
+    <div id="voice-overlay" class="fixed inset-0 z-50 bg-[#020203] flex flex-col items-center justify-start overflow-y-auto py-10 px-4 hidden opacity-0 transition-opacity duration-300 min-h-screen">
         <!-- Ambient Glassmorphic Background Blobs -->
         <div class="ambient-blob blob-purple"></div>
         <div class="ambient-blob blob-cyan"></div>
         <div class="ambient-blob blob-pink"></div>
 
         <!-- Exit / Return Button -->
-        <button id="btn-close-voice" class="absolute top-6 right-6 w-12 h-12 rounded-full border border-slate-800 bg-[#020203]/40 text-slate-400 hover:text-white flex items-center justify-center hover:bg-slate-900 hover:border-slate-700 transition duration-200 cursor-pointer shadow-lg z-10" title="Exit Voice Mode">
+        <button id="btn-close-voice" class="fixed top-6 right-6 w-12 h-12 rounded-full border border-slate-800 bg-[#020203]/70 text-slate-400 hover:text-white flex items-center justify-center hover:bg-slate-900 hover:border-slate-700 transition duration-200 cursor-pointer shadow-2xl z-50" title="Exit Voice Mode">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
         </button>
 
-        <div class="flex flex-col items-center justify-center max-w-2xl w-full text-center space-y-12 px-6 z-10">
+        <div class="my-auto flex flex-col items-center justify-center max-w-2xl w-full text-center space-y-8 px-4 z-10 py-6">
             <!-- AgentAudioVisualizerAura (Size: XL | Color: #1FD5F9 | ColorShift: 0.3) -->
-            <div id="voice-wave-visualizer" class="relative flex flex-col items-center justify-center space-y-6 voice-speaking aspect-square w-full max-w-[280px]">
+            <div id="voice-wave-visualizer" class="relative flex flex-col items-center justify-center space-y-6 voice-speaking aspect-square w-full max-w-[260px]">
                 <!-- Aura Visualizer Container -->
                 <div id="voice-aura-visualizer" class="agent-aura-visualizer aura-xl cursor-pointer" data-color="#1FD5F9" data-color-shift="0.3" data-state="speaking" title="Agent Audio Visualizer Aura (Click to Interrupt)">
                     <!-- Aura Core Sphere -->
@@ -729,18 +729,18 @@
             </div>
 
             <!-- Dynamic Typography live text captions field -->
-            <div class="space-y-4 w-full">
-                <div class="flex items-center justify-between px-2 text-[9px] font-pixel uppercase tracking-wider">
+            <div class="space-y-3 w-full">
+                <div class="flex items-center justify-between px-3 text-[10px] font-pixel uppercase tracking-wider">
                     <span class="text-slate-400">Voice Transmission</span>
                     <span id="voice-status-indicator" class="text-slate-500 font-bold transition duration-200 uppercase">Idle</span>
                 </div>
-                <div id="voice-overlay-captions" class="text-xl md:text-2xl font-semibold text-slate-350 leading-relaxed min-h-24 px-6 bg-slate-950/20 py-8 rounded-2xl border border-slate-900/40 backdrop-blur-sm shadow-inner font-grotesk">
+                <div id="voice-overlay-captions" class="text-base md:text-lg font-semibold text-slate-200 leading-relaxed min-h-24 max-h-56 overflow-y-auto p-5 bg-slate-950/60 rounded-2xl border border-slate-800/80 backdrop-blur-md shadow-inner font-grotesk text-left whitespace-pre-wrap scroll-smooth">
                     Opening voice connection...
                 </div>
             </div>
             
             <!-- Voice Mode Action Buttons -->
-            <div class="flex items-center gap-4">
+            <div class="flex flex-wrap items-center justify-center gap-3">
                 <!-- Language Toggle Dropdown -->
                 <select id="sel-voice-lang" class="framer-pill-button bg-slate-950 border border-white/10 text-xs px-4 py-2.5 rounded-full cursor-pointer focus:outline-none focus:border-[#8b5cf6] font-pixel uppercase">
                     <option value="en-IN">English (India)</option>
@@ -765,6 +765,6 @@
     </div>
 
     <!-- Application Script -->
-    <script type="module" src="app.js?v=2.5.0"></script>
+    <script type="module" src="app.js?v=2.5.1"></script>
 </body>
 </html>
