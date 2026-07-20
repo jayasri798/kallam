@@ -784,7 +784,7 @@ html, body {
 }
 
 /* Mobile Responsive Overlay Drawer for Sidebar */
-@media (max-w: 768px) {
+@media (max-width: 768px) {
     #sidebar {
         position: fixed !important;
         top: 0 !important;

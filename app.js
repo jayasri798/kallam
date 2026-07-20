@@ -646,6 +646,12 @@ Student Supervision: A designated Faculty Advisor oversees student course regist
                     appContainer.classList.remove("opacity-0");
                 }, 50);
             }
+            if (sidebar) {
+                sidebar.classList.remove("sidebar-collapsed");
+                if (window.innerWidth < 768) {
+                    sidebar.classList.add("sidebar-open");
+                }
+            }
         }, 500);
     }
 
