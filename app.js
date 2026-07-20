@@ -761,14 +761,15 @@ Student Supervision: A designated Faculty Advisor oversees student course regist
 
         if (circularsList) {
             circularsList.innerHTML = "";
-            if (logs.length === 0) {
+            const sidebarLogs = logs.filter(log => log.showInSidebar !== false);
+            if (sidebarLogs.length === 0) {
                 circularsList.innerHTML = `
                     <div class="text-center py-8 text-slate-500 text-xs italic">
                         No circular logs active.
                     </div>
                 `;
             } else {
-                logs.forEach(log => {
+                sidebarLogs.forEach(log => {
                     const item = document.createElement("div");
                     item.className = "p-4.5 rounded-2xl border border-slate-900 bg-slate-900/10 cursor-pointer circular-item transition duration-200";
                     item.innerHTML = `
@@ -2152,6 +2153,8 @@ function solve(input) {
         if (textContentInput) textContentInput.value = "";
         const urgentInput = document.getElementById("notice-urgent-toggle");
         if (urgentInput) urgentInput.checked = false;
+        const showInSidebarInput = document.getElementById("notice-show-sidebar-toggle");
+        if (showInSidebarInput) showInSidebarInput.checked = true;
         if (progressBarContainer) progressBarContainer.classList.add("hidden");
         if (progressBarFill) progressBarFill.style.width = "0%";
         if (progressPercent) progressPercent.textContent = "0%";
@@ -2377,10 +2380,12 @@ Ensure the output is ONLY a valid JSON object, without any markdown code blocks,
         
         const catInput = document.getElementById("notice-category");
         const urgentInput = document.getElementById("notice-urgent-toggle");
+        const showInSidebarInput = document.getElementById("notice-show-sidebar-toggle");
         const textContentInput = document.getElementById("notice-text-content");
 
         const selectedCategory = catInput ? catInput.value : "Academic";
         const isUrgent = urgentInput ? urgentInput.checked : false;
+        const showInSidebar = showInSidebarInput ? showInSidebarInput.checked : true;
         const manualText = textContentInput ? textContentInput.value.trim() : "";
 
         const fileName = file ? file.name : "Direct Notice";
@@ -2395,6 +2400,7 @@ Ensure the output is ONLY a valid JSON object, without any markdown code blocks,
             summary: defaultSummary,
             fullText: defaultFullText,
             urgent: isUrgent,
+            showInSidebar: showInSidebar,
             timestamp: Date.now()
         };
         
