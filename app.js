@@ -823,20 +823,20 @@ Student Supervision: A designated Faculty Advisor oversees student course regist
             } else {
                 logs.forEach(log => {
                     const tr = document.createElement("tr");
-                    tr.className = "border-b border-slate-900/60 hover:bg-slate-950/40 transition duration-150";
+                    tr.className = "border-b border-slate-800/80 hover:bg-slate-900/50 transition duration-150";
                     tr.innerHTML = `
-                        <td class="p-4 font-semibold text-slate-200">
-                            <div class="truncate max-w-xs md:max-w-md font-pixel uppercase text-[11px]" title="${log.title}">${log.title}</div>
+                        <td class="p-5 font-bold text-white">
+                            <div class="truncate max-w-xs md:max-w-md font-grotesk font-bold text-sm md:text-base text-slate-100" title="${log.title}">${log.title}</div>
                         </td>
-                        <td class="p-4">
-                            <span class="text-[9px] uppercase font-bold tracking-wider px-2 py-0.5 rounded ${log.urgent ? 'text-rose-400 bg-rose-500/10 border border-rose-500/20' : 'text-blue-400 bg-blue-500/10 border border-blue-500/20'}">
+                        <td class="p-5">
+                            <span class="text-xs uppercase font-extrabold tracking-wider px-3 py-1 rounded-full ${log.urgent ? 'text-rose-400 bg-rose-500/20 border border-rose-500/40' : 'text-sky-400 bg-sky-500/20 border border-sky-500/40'}">
                                 ${log.category}
                             </span>
                         </td>
-                        <td class="p-4 text-slate-400">${log.date}</td>
-                        <td class="p-4 text-right">
-                            <button class="btn-delete-bulletin text-rose-500 hover:text-rose-400 p-2 rounded-xl hover:bg-rose-950/20 transition cursor-pointer" data-id="${log.id}" title="Delete Bulletin">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 inline">
+                        <td class="p-5 text-slate-300 font-semibold text-xs md:text-sm">${log.date}</td>
+                        <td class="p-5 text-right">
+                            <button class="btn-delete-bulletin text-rose-400 hover:text-rose-300 p-2.5 rounded-xl hover:bg-rose-950/40 border border-rose-900/50 transition cursor-pointer" data-id="${log.id}" title="Delete Bulletin">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 inline">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
                                 </svg>
                             </button>
