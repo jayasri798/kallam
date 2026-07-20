@@ -1541,6 +1541,11 @@ function solve(input) {
 
 
     function setMicState(state) {
+        const auraVis = document.getElementById("voice-aura-visualizer");
+        if (auraVis) {
+            auraVis.setAttribute("data-state", state);
+        }
+
         if (voiceOverlay) {
             voiceOverlay.classList.remove("voice-listening", "voice-speaking", "voice-muted");
         }
@@ -1575,7 +1580,7 @@ function solve(input) {
             } else if (state === 'speaking') {
                 voiceStatusIndicator.textContent = "Speaking";
                 voiceStatusIndicator.classList.remove("text-slate-500");
-                voiceStatusIndicator.classList.add("text-[#5aa2fa]");
+                voiceStatusIndicator.classList.add("text-[#1FD5F9]");
             } else {
                 voiceStatusIndicator.textContent = "Processing";
                 voiceStatusIndicator.classList.remove("text-slate-500");

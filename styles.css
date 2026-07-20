@@ -820,6 +820,162 @@ html, body {
     max-height: calc(100vh - 4rem) !important;
 }
 
+/* ==========================================================================
+   AGENT AUDIO VISUALIZER AURA (Size: XL | Color: #1FD5F9 | ColorShift: 0.3)
+   ========================================================================== */
+.agent-aura-visualizer {
+    position: relative !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 220px !important;
+    height: 220px !important;
+    margin: 0 auto !important;
+}
+
+/* Size XL preset */
+.agent-aura-visualizer.aura-xl {
+    width: 240px !important;
+    height: 240px !important;
+}
+
+/* Aura Core Sphere */
+.agent-aura-visualizer .aura-core {
+    width: 150px !important;
+    height: 150px !important;
+    border-radius: 50% !important;
+    background: radial-gradient(circle at 30% 30%, #1FD5F9, #0284c7 40%, #030712 85%) !important;
+    box-shadow: 0 0 60px rgba(31, 213, 249, 0.6), 
+                inset 0 0 35px rgba(255, 255, 255, 0.4),
+                0 0 120px rgba(31, 213, 249, 0.3) !important;
+    position: relative !important;
+    z-index: 5 !important;
+    animation: auraCoreMorph 8s ease-in-out infinite, auraCorePulse 4s ease-in-out infinite !important;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+/* Chromatic ColorShift 0.3 Orbit Rings */
+.agent-aura-visualizer .aura-ring {
+    position: absolute !important;
+    border-radius: 50% !important;
+    pointer-events: none !important;
+    transition: all 0.4s ease-in-out !important;
+}
+
+.agent-aura-visualizer .aura-ring.ring-1 {
+    inset: -15px !important;
+    border: 2px solid rgba(31, 213, 249, 0.4) !important;
+    box-shadow: 0 0 30px rgba(31, 213, 249, 0.35), inset 0 0 20px rgba(31, 213, 249, 0.2) !important;
+    animation: auraOrbitClockwise 10s linear infinite !important;
+}
+
+.agent-aura-visualizer .aura-ring.ring-2 {
+    inset: -30px !important;
+    border: 1.5px dashed rgba(139, 92, 246, 0.45) !important;
+    box-shadow: 0 0 40px rgba(139, 92, 246, 0.3) !important;
+    animation: auraOrbitCounter 14s linear infinite !important;
+}
+
+.agent-aura-visualizer .aura-ring.ring-3 {
+    inset: -45px !important;
+    border: 1px solid rgba(56, 189, 248, 0.3) !important;
+    box-shadow: 0 0 50px rgba(56, 189, 248, 0.25) !important;
+    animation: auraPulseExpand 3s ease-in-out infinite !important;
+}
+
+.agent-aura-visualizer .aura-pulse-wave {
+    position: absolute !important;
+    inset: -60px !important;
+    border-radius: 50% !important;
+    background: radial-gradient(circle, rgba(31, 213, 249, 0.15) 0%, rgba(139, 92, 246, 0.05) 50%, transparent 75%) !important;
+    opacity: 0.5 !important;
+    animation: auraWaveRadiate 2.5s ease-out infinite !important;
+    pointer-events: none !important;
+}
+
+/* Keyframe Animations */
+@keyframes auraCoreMorph {
+    0%, 100% { border-radius: 46% 54% 65% 35% / 45% 45% 55% 55%; }
+    33% { border-radius: 65% 35% 50% 50% / 55% 35% 65% 45%; }
+    66% { border-radius: 50% 50% 35% 65% / 35% 65% 45% 55%; }
+}
+
+@keyframes auraCorePulse {
+    0%, 100% { transform: scale(1); filter: brightness(1); }
+    50% { transform: scale(1.06); filter: brightness(1.2); }
+}
+
+@keyframes auraOrbitClockwise {
+    0% { transform: rotate(0deg) scale(1); }
+    50% { transform: rotate(180deg) scale(1.04); }
+    100% { transform: rotate(360deg) scale(1); }
+}
+
+@keyframes auraOrbitCounter {
+    0% { transform: rotate(360deg) scale(1); }
+    50% { transform: rotate(180deg) scale(1.05); }
+    100% { transform: rotate(0deg) scale(1); }
+}
+
+@keyframes auraPulseExpand {
+    0%, 100% { transform: scale(1); opacity: 0.4; }
+    50% { transform: scale(1.08); opacity: 0.8; box-shadow: 0 0 60px rgba(31, 213, 249, 0.5); }
+}
+
+@keyframes auraWaveRadiate {
+    0% { transform: scale(0.85); opacity: 0.8; }
+    100% { transform: scale(1.25); opacity: 0; }
+}
+
+/* State: SPEAKING (AI Active Audio Output) */
+.agent-aura-visualizer[data-state="speaking"],
+.voice-speaking .agent-aura-visualizer {
+    transform: scale(1.08) !important;
+}
+
+.agent-aura-visualizer[data-state="speaking"] .aura-core,
+.voice-speaking .agent-aura-visualizer .aura-core {
+    background: radial-gradient(circle at 30% 30%, #1FD5F9, #38bdf8 35%, #8b5cf6 70%, #030712 90%) !important;
+    box-shadow: 0 0 90px rgba(31, 213, 249, 0.8), 
+                inset 0 0 50px rgba(255, 255, 255, 0.5),
+                0 0 160px rgba(139, 92, 246, 0.5) !important;
+    animation: auraCoreMorph 3s ease-in-out infinite, auraSpeakPulse 1.1s ease-in-out infinite alternate !important;
+}
+
+@keyframes auraSpeakPulse {
+    0% { transform: scale(1); filter: brightness(1.1); }
+    100% { transform: scale(1.18); filter: brightness(1.4); }
+}
+
+.agent-aura-visualizer[data-state="speaking"] .aura-ring.ring-1,
+.voice-speaking .agent-aura-visualizer .aura-ring.ring-1 {
+    border-color: rgba(31, 213, 249, 0.8) !important;
+    box-shadow: 0 0 45px rgba(31, 213, 249, 0.6) !important;
+    animation: auraOrbitClockwise 4s linear infinite !important;
+}
+
+/* State: LISTENING (Mic User Speech Active) */
+.agent-aura-visualizer[data-state="listening"],
+.voice-listening .agent-aura-visualizer .aura-core {
+    background: radial-gradient(circle at 30% 30%, #1FD5F9, #06b6d4 40%, #0f172a 85%) !important;
+    box-shadow: 0 0 90px rgba(31, 213, 249, 0.9), 
+                inset 0 0 50px rgba(255, 255, 255, 0.5),
+                0 0 150px rgba(6, 182, 212, 0.6) !important;
+    animation: auraCoreMorph 2.5s ease-in-out infinite, auraListenPulse 0.85s ease-in-out infinite alternate !important;
+}
+
+@keyframes auraListenPulse {
+    0% { transform: scale(1); filter: brightness(1.1); }
+    100% { transform: scale(1.22); filter: brightness(1.45); }
+}
+
+/* State: THINKING (AI RAG Processing) */
+.agent-aura-visualizer[data-state="thinking"] .aura-core {
+    background: radial-gradient(circle at 30% 30%, #8b5cf6, #1FD5F9 50%, #030712 90%) !important;
+    box-shadow: 0 0 70px rgba(139, 92, 246, 0.7), inset 0 0 40px rgba(255, 255, 255, 0.3) !important;
+    animation: auraCoreMorph 4s ease-in-out infinite, auraCorePulse 1.5s ease-in-out infinite !important;
+}
+
 
 
 

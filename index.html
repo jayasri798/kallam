@@ -12,7 +12,7 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <!-- Custom Style Sheet -->
-    <link rel="stylesheet" href="styles.css?v=2.4.3">
+    <link rel="stylesheet" href="styles.css?v=2.5.0">
     <style>
         /* Framework-independent layout rules for full-screen sizing */
         #app-container:not(.hidden) {
@@ -712,10 +712,20 @@
         </button>
 
         <div class="flex flex-col items-center justify-center max-w-2xl w-full text-center space-y-12 px-6 z-10">
-            <!-- Large focused floating fluid orb -->
-            <div id="voice-wave-visualizer" class="relative flex flex-col items-center justify-center space-y-6 voice-speaking">
-                <!-- Fluid animated interactive orb -->
-                <div id="voice-logo-container" class="voice-fluid-orb cursor-pointer" title="Click to Interrupt"></div>
+            <!-- AgentAudioVisualizerAura (Size: XL | Color: #1FD5F9 | ColorShift: 0.3) -->
+            <div id="voice-wave-visualizer" class="relative flex flex-col items-center justify-center space-y-6 voice-speaking aspect-square w-full max-w-[280px]">
+                <!-- Aura Visualizer Container -->
+                <div id="voice-aura-visualizer" class="agent-aura-visualizer aura-xl cursor-pointer" data-color="#1FD5F9" data-color-shift="0.3" data-state="speaking" title="Agent Audio Visualizer Aura (Click to Interrupt)">
+                    <!-- Aura Core Sphere -->
+                    <div class="aura-core"></div>
+                    <!-- Aura Chromatic Shift Rings (colorShift: 0.3) -->
+                    <div class="aura-ring ring-1"></div>
+                    <div class="aura-ring ring-2"></div>
+                    <div class="aura-ring ring-3"></div>
+                    <div class="aura-pulse-wave"></div>
+                    <!-- Legacy logo container anchor -->
+                    <div id="voice-logo-container" class="hidden"></div>
+                </div>
             </div>
 
             <!-- Dynamic Typography live text captions field -->
@@ -755,6 +765,6 @@
     </div>
 
     <!-- Application Script -->
-    <script type="module" src="app.js?v=2.4.3"></script>
+    <script type="module" src="app.js?v=2.5.0"></script>
 </body>
 </html>
