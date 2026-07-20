@@ -12,7 +12,7 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <!-- Custom Style Sheet -->
-    <link rel="stylesheet" href="styles.css?v=2.3.2">
+    <link rel="stylesheet" href="styles.css?v=2.3.3">
     <style>
         /* Framework-independent layout rules for full-screen sizing */
         #app-container:not(.hidden) {
@@ -152,8 +152,8 @@
             <!-- Sleek Top Bar with Status Icons -->
             <header class="h-16 border-b border-slate-900/85 px-6 flex items-center justify-between shrink-0 bg-[#040404]/50 backdrop-blur-md">
                 <div class="flex items-center gap-3">
-                    <!-- Mobile sidebar toggle -->
-                    <button id="btn-mobile-sidebar" class="md:hidden text-slate-400 hover:text-slate-200">
+                    <!-- Universal sidebar toggle button (Desktop & Mobile) -->
+                    <button id="btn-mobile-sidebar" class="text-slate-400 hover:text-white p-2 rounded-xl hover:bg-slate-900/60 transition cursor-pointer flex items-center justify-center" title="Toggle Circular Bulletins Sidebar">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
                         </svg>
@@ -753,6 +753,6 @@
     </div>
 
     <!-- Application Script -->
-    <script type="module" src="app.js?v=2.3.2"></script>
+    <script type="module" src="app.js?v=2.3.3"></script>
 </body>
 </html>

@@ -688,16 +688,26 @@ Student Supervision: A designated Faculty Advisor oversees student course regist
     }
 
     // --- Collapsible Sidebar Functions ---
-    if (btnToggleSidebar && sidebar) {
-        btnToggleSidebar.addEventListener("click", () => {
+    function toggleSidebar() {
+        if (!sidebar) return;
+        if (window.innerWidth < 768) {
+            sidebar.classList.toggle("sidebar-open");
+        } else {
             sidebar.classList.toggle("sidebar-collapsed");
+        }
+    }
+
+    if (btnToggleSidebar) {
+        btnToggleSidebar.addEventListener("click", (e) => {
+            e.stopPropagation();
+            toggleSidebar();
         });
     }
     
-    if (btnMobileSidebar && sidebar) {
+    if (btnMobileSidebar) {
         btnMobileSidebar.addEventListener("click", (e) => {
             e.stopPropagation();
-            sidebar.classList.toggle("sidebar-open");
+            toggleSidebar();
         });
     }
 
