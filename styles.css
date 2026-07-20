@@ -812,6 +812,14 @@ html, body {
     }
 }
 
+/* Explicit Scroll Container Rules for Admin Workspace */
+#admin-workspace {
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    height: calc(100vh - 4rem) !important;
+    max-height: calc(100vh - 4rem) !important;
+}
+
 
 
 

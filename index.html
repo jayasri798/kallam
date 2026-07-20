@@ -12,7 +12,7 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <!-- Custom Style Sheet -->
-    <link rel="stylesheet" href="styles.css?v=2.4.1">
+    <link rel="stylesheet" href="styles.css?v=2.4.2">
     <style>
         /* Framework-independent layout rules for full-screen sizing */
         #app-container:not(.hidden) {
@@ -427,7 +427,8 @@
             </div>
 
             <!-- Admin Workspace Section (Completely hidden by default) -->
-            <div id="admin-workspace" class="flex-1 min-h-0 h-[calc(100vh-4rem)] overflow-y-auto p-4 md:p-6 hidden flex flex-col items-center justify-start gap-6 pb-28 w-full max-w-5xl mx-auto">
+            <div id="admin-workspace" class="flex-1 h-[calc(100vh-4rem)] max-h-[calc(100vh-4rem)] overflow-y-auto hidden w-full">
+                <div class="w-full max-w-5xl mx-auto p-4 md:p-6 flex flex-col items-center justify-start gap-6 pb-36">
                 
                 <!-- Admin Header & Real-Time Analytics Cards Grid -->
                 <div class="w-full space-y-4">
@@ -691,6 +692,7 @@
                     </div>
                 </div>
 
+                </div>
             </div>
         </main>
     </div>
@@ -753,6 +755,6 @@
     </div>
 
     <!-- Application Script -->
-    <script type="module" src="app.js?v=2.4.1"></script>
+    <script type="module" src="app.js?v=2.4.2"></script>
 </body>
 </html>
